@@ -1,5 +1,7 @@
-import numpy as np
 from math import floor
+
+import numpy as np
+
 from constants import roundConstants
 
 
@@ -52,12 +54,12 @@ def SubCell(state):
     :param state: The state
     :return: A new state in which the permumtation is applied.
     """
-    print("SubCell, original state:\n{}".format(state))
+    print("SubCell, 'before' state:\n{}\n".format(state))
     for col in range(4):
         for row in range(4):
             si = state[row, col]
             state[row, col] = SSbi(si, (col * 4 + row) % 4)
-            print("SubCell, new state:\n{}".format(state))
+    print("SubCell, 'after' state:\n{}\n".format(state))
     return state
 
 
@@ -68,17 +70,20 @@ def ShuffleCell(state):
     :param state: The current state matrix S.
     :return: Permuted state matrix S
     """
+    print("ShuffleCell, original state:\n{}\n".format(state))
     sDict = {}
     for col in range(4):
         for row in range(4):
             i = col * 4 + row
             sDict['s' + str(i)] = state[row, col]
-    return np.matrix([
+    newState = np.matrix([
         [sDict['s0'], sDict['s14'], sDict['s9'], sDict['s7']],
         [sDict['s10'], sDict['s4'], sDict['s3'], sDict['s13']],
         [sDict['s5'], sDict['s11'], sDict['s12'], sDict['s2']],
         [sDict['s15'], sDict['s1'], sDict['s6'], sDict['s8']]
     ])
+    print("ShuffleCell, new state:\n{}\n".format(newState))
+    return newState
 
 
 def MixColumn(state):
@@ -96,12 +101,13 @@ def MixColumn(state):
         [1, 1, 1, 0]
     ]
     )
-    print(np.array(state[:, 0]))
+    print("MixColumn, 'before' state:\n{}\n".format(state))
+    print(state[:, 0])
     state[:, 0] = M.dot(state[:, 0]) % 256
     state[:, 1] = M.dot(state[:, 1]) % 256
     state[:, 2] = M.dot(state[:, 2]) % 256
     state[:, 3] = M.dot(state[:, 3]) % 256
-    print("MixColumn result:\n{}".format(state))
+    print("MixColumn 'new' state:\n{}\n".format(state))
     return state
 
 
@@ -136,40 +142,41 @@ def RoundKeyGen(key):
     :return: The round keys derived from the initial key
     """
     roundKeys = []
-    roundKey = key
+    keyBytes = SplitByN(key, 8)  # Split current round key into an array of bytes
     for r in range(19):
         rConst = roundConstants[r]
-        curRoundKeyBytes = SplitByN(roundKey, 8)  # Split current round key into an array of bytes
         newRoundKeyBytes = []
         for i in range(16):
             # loop through round constant array and XOR with LSB bit of current byte of key
             # Calculate the 2d index from the 1d index
             col = floor(i / 4)
             row = i % 4
-            bit = rConst[row, col]  # Take the value from the round constant to XOR with
-            curRoundKeyByte = curRoundKeyBytes[i]
-            newRoundKeyByte = bin(int(curRoundKeyByte, 2) ^ bit)[2:].zfill(
-                8)  # Perform the XOR with the LSB of the current byte
+            bit = rConst[row, col]  # Take the value from the round constant to add with
+            curRoundKeyByte = keyBytes[i]
+            # XOR (?) with LSB of the current byte
+            newRoundKeyByte = bin(int(curRoundKeyByte, 2) ^ bit)[2:].zfill(8)
             newRoundKeyBytes.append(newRoundKeyByte)
         roundKey = ''.join(newRoundKeyBytes)  # Reconstruct round key
         roundKeys.append(roundKey)
     return roundKeys
 
 
-def KeyAdd(stateS, roundKeyI):
+def KeyAdd(state, roundKeyI):
     """
     The i-th n-bit round key RKi is XORed to a state S.
-    :param stateS: state S
+    :param state: state S
     :param roundKeyI: The ith round key
     :return: The new state S in which the round key is XORed with the state.
     """
+    print("KeyAdd, 'before' state:\n{}\n".format(state))
     roundKeyBytesArray = SplitByN(roundKeyI, 8)
     for col in range(4):
         for row in range(4):
-            si = stateS[row, col]
+            si = state[row, col]
             roundKeyByte = int(roundKeyBytesArray[col * 4 + row], 2)
-            stateS[row, col] = roundKeyByte ^ si
-    return stateS
+            state[row, col] = roundKeyByte ^ si
+    print("KeyAdd, 'after' state:\n{}\n".format(state))
+    return state
 
 
 def InitializeState(binaryString):
@@ -186,7 +193,7 @@ def InitializeState(binaryString):
         for row in range(4):
             binary = plaintextBytes[col * 4 + row]
             S[row, col] = int(binary, 2)
-    print("The initial state is as follows:\n{}".format(S))
+    print("The initial state is as follows:\n{}\n".format(S))
     return S
 
 
@@ -199,7 +206,7 @@ def MidoriEncrypt(plaintext, key):
     """
     plaintext = plaintext[2:].zfill(128)  # Remove the binary prefix in the binary strings, and pad with zeros
     key = key[2:].zfill(128)
-    print("plaintext:\t{}\nkey:\t\t{}".format(plaintext, key))
+    print("plaintext:\t{}\nkey:\t\t{}\n".format(plaintext, key))
     r = 20  # Number of rounds
     state = InitializeState(plaintext)
     state = KeyAdd(state, key)
@@ -220,9 +227,9 @@ def MidoriEncrypt(plaintext, key):
 def main():
     # Midori 128 implementation
     # Convert input, given as hex, to binary (padded with zeros)
-    plaintext = bin(0x51084ce6e73a5ca2ec87d7babc297543)
-    key = bin(0x687ded3b3c85b3f35b1009863e2a8cbf)
-    ciphertext = "0x1e0ac4fddff71b4c1801b73ee4afc83d"
+    plaintext = bin(0x00000000000000000000000000000000)
+    key = bin(0x00000000000000000000000000000000)
+    ciphertext = "c055cbb95996d14902b60574d5e728d6"
     c = MidoriEncrypt(plaintext, key)
     if c != ciphertext:
         print("The ciphertexts were not the same.")
