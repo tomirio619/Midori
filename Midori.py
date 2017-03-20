@@ -13,38 +13,24 @@ def SSbi(x, i):
     :return: A permuted x
     """
     # x0 is the most significant bit, x7 the least significant
-    x0 = x & 128
-    x1 = x & 64
-    x2 = x & 32
-    x3 = x & 16
-    x4 = x & 8
-    x5 = x & 4
-    x6 = x & 2
+    x0 = (x >> 7) & 1
+    x1 = (x >> 6) & 1
+    x2 = (x >> 5) & 1
+    x3 = (x >> 4) & 1
+    x4 = (x >> 3) & 1
+    x5 = (x >> 2) & 1
+    x6 = (x >> 1) & 1
     x7 = x & 1
     result = 0
     if i == 0:
-        result = BitArrayToInt([x4, x1, x6, x3, x0, x5, x2, x7])
+        result = "".join(map(str, [x4, x1, x6, x3, x0, x5, x2, x7]))
     elif i == 1:
-        result = BitArrayToInt([x1, x6, x7, x0, x5, x2, x3, x4])
+        result = "".join(map(str, [x1, x6, x7, x0, x5, x2, x3, x4]))
     elif i == 2:
-        result = BitArrayToInt([x2, x3, x4, x1, x6, x7, x0, x5])
+        result = "".join(map(str, [x2, x3, x4, x1, x6, x7, x0, x5]))
     elif i == 3:
-        result = BitArrayToInt([x7, x4, x1, x2, x3, x0, x5, x6])
-    return result
-
-
-def BitArrayToInt(bitarray):
-    """
-    Converts a array of bits, where the first element is the most significant bit and the last element the least
-    significant one, to the corresponding integer value.
-    :param bitarray: The bitarray containing all of the bits
-    :return: The integer value that corresponds to the binary representation of the bit array.
-    """
-    newNumber = 0
-    for i in range(len(bitarray) - 1, -1, -1):
-        if bitarray[i] > 0:
-            newNumber |= 1 << (len(bitarray) - i - 1)
-    return newNumber
+        result = "".join(map(str, [x7, x4, x1, x2, x3, x0, x5, x6]))
+    return int(result, 2)
 
 
 def SubCell(state):
@@ -57,8 +43,9 @@ def SubCell(state):
     print("SubCell, 'before' state:\n{}\n".format(state))
     for col in range(4):
         for row in range(4):
+            i = col * 4 + row
             si = state[row, col]
-            state[row, col] = SSbi(si, (col * 4 + row) % 4)
+            state[row, col] = SSbi(si, i % 4)
     print("SubCell, 'after' state:\n{}\n".format(state))
     return state
 
@@ -91,10 +78,9 @@ def MixColumn(state):
     MixColumn (S): M is applied to every 4m-bit column of the state S, i.e.,
     (si; si+1; si+2; si+3)^T =  M * (si; si+1; si+2; si+3)^T and i = 0; 4; 8; 12.
     :param state: The current state matrix
-    :param M: The involutive binary matrix
     :return: Updated state
     """
-    M = np.matrix([
+    m = np.matrix([
         [0, 1, 1, 1],
         [1, 0, 1, 1],
         [1, 1, 0, 1],
@@ -103,10 +89,10 @@ def MixColumn(state):
     )
     print("MixColumn, 'before' state:\n{}\n".format(state))
     print(state[:, 0])
-    state[:, 0] = M.dot(state[:, 0]) % 256
-    state[:, 1] = M.dot(state[:, 1]) % 256
-    state[:, 2] = M.dot(state[:, 2]) % 256
-    state[:, 3] = M.dot(state[:, 3]) % 256
+    state[:, 0] = m.dot(state[:, 0]) % 256
+    state[:, 1] = m.dot(state[:, 1]) % 256
+    state[:, 2] = m.dot(state[:, 2]) % 256
+    state[:, 3] = m.dot(state[:, 3]) % 256
     print("MixColumn 'new' state:\n{}\n".format(state))
     return state
 
@@ -147,13 +133,13 @@ def RoundKeyGen(key):
         rConst = roundConstants[r]
         newRoundKeyBytes = []
         for i in range(16):
-            # loop through round constant array and XOR with LSB bit of current byte of key
+            # loop through round constant matrix and XOR with LSB bit of current byte of key
             # Calculate the 2d index from the 1d index
             col = floor(i / 4)
             row = i % 4
             bit = rConst[row, col]  # Take the value from the round constant to add with
             curRoundKeyByte = keyBytes[i]
-            # XOR (?) with LSB of the current byte
+            # XOR with LSB of the current byte
             newRoundKeyByte = bin(int(curRoundKeyByte, 2) ^ bit)[2:].zfill(8)
             newRoundKeyBytes.append(newRoundKeyByte)
         roundKey = ''.join(newRoundKeyBytes)  # Reconstruct round key
@@ -168,14 +154,14 @@ def KeyAdd(state, roundKeyI):
     :param roundKeyI: The ith round key
     :return: The new state S in which the round key is XORed with the state.
     """
-    print("KeyAdd, 'before' state:\n{}\n".format(state))
+    # print("KeyAdd, 'before' state:\n{}\n".format(state))
     roundKeyBytesArray = SplitByN(roundKeyI, 8)
     for col in range(4):
         for row in range(4):
             si = state[row, col]
             roundKeyByte = int(roundKeyBytesArray[col * 4 + row], 2)
             state[row, col] = roundKeyByte ^ si
-    print("KeyAdd, 'after' state:\n{}\n".format(state))
+    # print("KeyAdd, 'after' state:\n{}\n".format(state))
     return state
 
 
@@ -185,16 +171,16 @@ def InitializeState(binaryString):
     :param binaryString: The binary string
     :return: The state that corresponds to the given binary string.
     """
-    S = np.zeros(shape=(4, 4), dtype=np.uint8)
-    print(S)
+    state = np.zeros(shape=(4, 4), dtype=np.uint8)
+    print(state)
     # Again, s0 contains the 8 most significant bits of the plaintext, and s15 the least significant ones
     plaintextBytes = SplitByN(binaryString, 8)
     for col in range(4):
         for row in range(4):
             binary = plaintextBytes[col * 4 + row]
-            S[row, col] = int(binary, 2)
-    print("The initial state is as follows:\n{}\n".format(S))
-    return S
+            state[row, col] = int(binary, 2)
+    print("The initial state is as follows:\n{}\n".format(state))
+    return state
 
 
 def MidoriEncrypt(plaintext, key):
@@ -210,6 +196,8 @@ def MidoriEncrypt(plaintext, key):
     r = 20  # Number of rounds
     state = InitializeState(plaintext)
     state = KeyAdd(state, key)
+    print("State after KeyAdd:\n{}\n".format(StateToBinary(state)))
+    print("Hex state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
     RKs = RoundKeyGen(key)
     # This is where the magic happens
     for i in range(r - 1):
@@ -217,6 +205,9 @@ def MidoriEncrypt(plaintext, key):
         state = ShuffleCell(state)
         state = MixColumn(state)
         state = KeyAdd(state, RKs[i])
+        # print("state after round {}:\n{:02x}\n".format(i, int(StateToBinary(state), 2)))
+        print("state after round {}:\n{}\n".format(i, StateToBinary(state)))
+        print("Expected value after round 0:\n{}\n".format(bin(0xED0DF07C6CA92EDDEEA3E6553458C331)[2:].zfill(128)))
     state = SubCell(state)
     y = KeyAdd(state, key)
     ciphertext = int(StateToBinary(y), 2)
@@ -227,9 +218,9 @@ def MidoriEncrypt(plaintext, key):
 def main():
     # Midori 128 implementation
     # Convert input, given as hex, to binary (padded with zeros)
-    plaintext = bin(0x00000000000000000000000000000000)
-    key = bin(0x00000000000000000000000000000000)
-    ciphertext = "c055cbb95996d14902b60574d5e728d6"
+    plaintext = bin(0x51084CE6E73A5CA2EC87D7BABC297543)
+    key = bin(0x687DED3B3C85B3F35B1009863E2A8CBF)
+    ciphertext = "0x1E0AC4FDDFF71B4C1801B73EE4AFC83D"
     c = MidoriEncrypt(plaintext, key)
     if c != ciphertext:
         print("The ciphertexts were not the same.")
