@@ -1,8 +1,7 @@
 from math import floor
-
 import numpy as np
-
 from constants import roundConstants
+from sboxes import Sb1
 
 
 def SSbi(x, i):
@@ -21,16 +20,29 @@ def SSbi(x, i):
     x5 = (x >> 2) & 1
     x6 = (x >> 1) & 1
     x7 = x & 1
-    result = 0
+    binResult = []
     if i == 0:
-        result = "".join(map(str, [x4, x1, x6, x3, x0, x5, x2, x7]))
+        n0 = Sb1([x4, x1, x6, x3])
+        n1 = Sb1([x0, x5, x2, x7])
+        binResult = [n1[0], n0[1], n1[2], n0[3],
+                     n0[0], n1[1], n0[2], n1[3]]
     elif i == 1:
-        result = "".join(map(str, [x1, x6, x7, x0, x5, x2, x3, x4]))
+        n0 = Sb1([x1, x6, x7, x0])
+        n1 = Sb1([x5, x2, x3, x4])
+        binResult = [n0[3], n0[0], n1[1], n1[2],
+                     n1[3], n1[0], n0[1], n0[2]]
     elif i == 2:
-        result = "".join(map(str, [x2, x3, x4, x1, x6, x7, x0, x5]))
+        n0 = Sb1([x2, x3, x4, x1])
+        n1 = Sb1([x6, x7, x0, x5])
+        binResult = [n1[2], n0[3], n0[0], n0[1],
+                     n0[2], n1[3], n1[0], n1[1]]
     elif i == 3:
-        result = "".join(map(str, [x7, x4, x1, x2, x3, x0, x5, x6]))
-    return int(result, 2)
+        n0 = Sb1([x7, x4, x1, x2])
+        n1 = Sb1([x3, x0, x5, x6])
+        binResult = [n1[1], n0[2], n0[3], n1[0],
+                     n0[1], n1[2], n1[3], n0[0]]
+    result = int("".join(binResult), 2)
+    return result
 
 
 def SubCell(state):
@@ -45,7 +57,8 @@ def SubCell(state):
         for row in range(4):
             i = col * 4 + row
             si = state[row, col]
-            state[row, col] = SSbi(si, i % 4)
+            permuted = SSbi(si, i % 4)
+            state[row, col] = permuted
     print("SubCell, 'after' state:\n{}\n".format(state))
     return state
 
@@ -88,12 +101,13 @@ def MixColumn(state):
     ]
     )
     print("MixColumn, 'before' state:\n{}\n".format(state))
-    print(state[:, 0])
-    state[:, 0] = m.dot(state[:, 0]) % 256
-    state[:, 1] = m.dot(state[:, 1]) % 256
-    state[:, 2] = m.dot(state[:, 2]) % 256
-    state[:, 3] = m.dot(state[:, 3]) % 256
-    print("MixColumn 'new' state:\n{}\n".format(state))
+    print("Matrix M is defined as follows\n{}\n".format(m))
+    for col in range(4):
+        print("We are going to multiply M with column {} \n{}\n".format(col, state[:, col]))
+        state[:, col] = m.dot(state[:, col]) % 256
+        print("Column {}, 'after' the multiplication with M:\n{}\n".format(col, state[:, col]))
+        print("MixColumn 'new' state:\n{}\n".format(state))
+    print("MixColumn 'final' state:\n{}\n".format(state))
     return state
 
 
@@ -154,14 +168,14 @@ def KeyAdd(state, roundKeyI):
     :param roundKeyI: The ith round key
     :return: The new state S in which the round key is XORed with the state.
     """
-    # print("KeyAdd, 'before' state:\n{}\n".format(state))
+    print("KeyAdd, 'before' state:\n{}\n".format(state))
     roundKeyBytesArray = SplitByN(roundKeyI, 8)
     for col in range(4):
         for row in range(4):
             si = state[row, col]
             roundKeyByte = int(roundKeyBytesArray[col * 4 + row], 2)
             state[row, col] = roundKeyByte ^ si
-    # print("KeyAdd, 'after' state:\n{}\n".format(state))
+    print("KeyAdd, 'after' state:\n{}\n".format(state))
     return state
 
 
@@ -202,12 +216,13 @@ def MidoriEncrypt(plaintext, key):
     # This is where the magic happens
     for i in range(r - 1):
         state = SubCell(state)
+        print("Hex state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
         state = ShuffleCell(state)
+        print("Hex state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
         state = MixColumn(state)
+        print("Hex state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
         state = KeyAdd(state, RKs[i])
-        # print("state after round {}:\n{:02x}\n".format(i, int(StateToBinary(state), 2)))
-        print("state after round {}:\n{}\n".format(i, StateToBinary(state)))
-        print("Expected value after round 0:\n{}\n".format(bin(0xED0DF07C6CA92EDDEEA3E6553458C331)[2:].zfill(128)))
+        print("Hex state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
     state = SubCell(state)
     y = KeyAdd(state, key)
     ciphertext = int(StateToBinary(y), 2)
