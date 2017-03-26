@@ -92,6 +92,7 @@ def MixColumn(state):
     """
     MixColumn (S): M is applied to every 4m-bit column of the state S, i.e.,
     (si; si+1; si+2; si+3)^T =  M * (si; si+1; si+2; si+3)^T and i = 0; 4; 8; 12.
+    Note that the calculations are done in GF(2^8).
     :param state: The current state matrix
     :return: Updated state
     """
