@@ -1,0 +1,36 @@
+[*]
+[*] GTKWave Analyzer v3.3.79 (w)1999-2017 BSI
+[*] Sat Apr 22 13:22:28 2017
+[*]
+[dumpfile] "C:\Users\Tomirio\Documents\CE Hardware Design\Project\midori-project\vdhl_source\tb_midori_ssbi.ghw"
+[dumpfile_mtime] "Sat Apr 22 12:50:26 2017"
+[dumpfile_size] 1656
+[savefile] "C:\Users\Tomirio\Documents\CE Hardware Design\Project\midori-project\vdhl_source\test.gtkw"
+[timestart] 0
+[size] 1920 1017
+[pos] -87 -87
+*-28.662832 163000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] top.
+[treeopen] top.tb_midori_ssbi.
+[treeopen] top.tb_midori_ssbi.test.
+[treeopen] top.tb_midori_ssbi.test.sb10.
+[treeopen] top.tb_midori_ssbi.test.sb11.
+[sst_width] 294
+[signals_width] 224
+[sst_expanded] 1
+[sst_vpaned_height] 300
+@28
+top.tb_midori_ssbi.test_error
+@22
+#{top.tb_midori_ssbi.test_a[7:0]} top.tb_midori_ssbi.test_a[7] top.tb_midori_ssbi.test_a[6] top.tb_midori_ssbi.test_a[5] top.tb_midori_ssbi.test_a[4] top.tb_midori_ssbi.test_a[3] top.tb_midori_ssbi.test_a[2] top.tb_midori_ssbi.test_a[1] top.tb_midori_ssbi.test_a[0]
+#{top.tb_midori_ssbi.test_o[7:0]} top.tb_midori_ssbi.test_o[7] top.tb_midori_ssbi.test_o[6] top.tb_midori_ssbi.test_o[5] top.tb_midori_ssbi.test_o[4] top.tb_midori_ssbi.test_o[3] top.tb_midori_ssbi.test_o[2] top.tb_midori_ssbi.test_o[1] top.tb_midori_ssbi.test_o[0]
+#{top.tb_midori_ssbi.test_i[3:0]} top.tb_midori_ssbi.test_i[3] top.tb_midori_ssbi.test_i[2] top.tb_midori_ssbi.test_i[1] top.tb_midori_ssbi.test_i[0]
+#{top.tb_midori_ssbi.true_o[7:0]} top.tb_midori_ssbi.true_o[7] top.tb_midori_ssbi.true_o[6] top.tb_midori_ssbi.true_o[5] top.tb_midori_ssbi.true_o[4] top.tb_midori_ssbi.true_o[3] top.tb_midori_ssbi.true_o[2] top.tb_midori_ssbi.true_o[1] top.tb_midori_ssbi.true_o[0]
+#{top.tb_midori_ssbi.test.output_sb11[3:0]} top.tb_midori_ssbi.test.output_sb11[3] top.tb_midori_ssbi.test.output_sb11[2] top.tb_midori_ssbi.test.output_sb11[1] top.tb_midori_ssbi.test.output_sb11[0]
+#{top.tb_midori_ssbi.test.o[7:0]} top.tb_midori_ssbi.test.o[7] top.tb_midori_ssbi.test.o[6] top.tb_midori_ssbi.test.o[5] top.tb_midori_ssbi.test.o[4] top.tb_midori_ssbi.test.o[3] top.tb_midori_ssbi.test.o[2] top.tb_midori_ssbi.test.o[1] top.tb_midori_ssbi.test.o[0]
+#{top.tb_midori_ssbi.test.output_sb11[3:0]} top.tb_midori_ssbi.test.output_sb11[3] top.tb_midori_ssbi.test.output_sb11[2] top.tb_midori_ssbi.test.output_sb11[1] top.tb_midori_ssbi.test.output_sb11[0]
+#{top.tb_midori_ssbi.test.input_sb11[3:0]} top.tb_midori_ssbi.test.input_sb11[3] top.tb_midori_ssbi.test.input_sb11[2] top.tb_midori_ssbi.test.input_sb11[1] top.tb_midori_ssbi.test.input_sb11[0]
+#{top.tb_midori_ssbi.test.output_sb10[3:0]} top.tb_midori_ssbi.test.output_sb10[3] top.tb_midori_ssbi.test.output_sb10[2] top.tb_midori_ssbi.test.output_sb10[1] top.tb_midori_ssbi.test.output_sb10[0]
+#{top.tb_midori_ssbi.test.input_sb10[3:0]} top.tb_midori_ssbi.test.input_sb10[3] top.tb_midori_ssbi.test.input_sb10[2] top.tb_midori_ssbi.test.input_sb10[1] top.tb_midori_ssbi.test.input_sb10[0]
+[pattern_trace] 1
+[pattern_trace] 0
