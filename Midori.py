@@ -59,7 +59,9 @@ def SubCell(state):
         for row in range(4):
             i = col * 4 + row
             si = state[row, col]
+            print("SubCell original state:{:02x}".format(si))
             permuted = SSbi(si, i % 4)
+            print("SubCell permuted state:{:02x}".format(permuted))
             state[row, col] = permuted
     print("SubCell, 'after' state:\n{}\n".format(state))
     return state
@@ -107,6 +109,7 @@ def MixColumn(state):
     print("Matrix M is defined as follows\n{}\n".format(m))
     for col in range(4):
         stateCol = np.squeeze(np.asarray(state[:, col]))
+        result = UpdateColumn(m, stateCol)
         state[:, col] = UpdateColumn(m, stateCol)
     print("MixColumn 'final' state:\n{}\n".format(state))
     return state
@@ -116,8 +119,8 @@ def UpdateColumn(m, col):
     results = np.zeros(4, dtype=np.uint8)
     for row in range(4):
         matrixRow = np.squeeze(np.asarray(m[row, :]))
-        print("The matrix row:", matrixRow)
-        print("The affected column:", col)
+        # print("The matrix row:", matrixRow)
+        # print("The affected column:", col)
         for (a, b) in zip(matrixRow, col):
             results[row] ^= PolyMult(a, b)
     newColumn = np.transpose(np.asmatrix(results))
@@ -296,24 +299,65 @@ def InitializeState(binaryString):
             binary = plaintextBytes[col * 4 + row]
             state[row, col] = int(binary, 2)
     print("The initial state:\n{}\n".format(state))
-    return state
+    return np.matrix(state)
 
 
-def MidoriEncrypt(plaintext, key):
+def InvShuffleCell(state):
+    """
+    Each cell of the state is permuted as follows:
+    (s0, s1, ..., s15) <=  (s0, s7, s14, s9, s5, s2, s11, s12, s15, s8, s1, s6, s10, s13, s4, s3):
+    :param state: The current state matrix S.
+    :return: Permuted state matrix S
+    """
+    print("InvShuffleCell, original state:\n{}\n".format(state))
+    sDict = {}
+    for col in range(4):
+        for row in range(4):
+            i = col * 4 + row
+            sDict['s' + str(i)] = state[row, col]
+    newState = np.matrix([
+        [sDict['s0'], sDict['s5'], sDict['s15'], sDict['s10']],
+        [sDict['s7'], sDict['s2'], sDict['s8'], sDict['s13']],
+        [sDict['s14'], sDict['s11'], sDict['s1'], sDict['s4']],
+        [sDict['s9'], sDict['s12'], sDict['s6'], sDict['s3']]
+    ])
+    print("InvShuffleCell, new state:\n{}\n".format(newState))
+    return newState
+
+
+def LinearInverse(roundkey):
+    """
+    L^1 (inverse of the linear layer) denotes the composition of the operations
+    InvShuffeCell o MixColumn, and InvShueCell permutes each cell of the state as
+    follows.
+    (s0, s1, ..., s15) <=  (s0, s7, s14, s9, s5, s2, s11, s12, s15, s8, s1, s6, s10, s13, s4, s3):
+    :param roundkey: The round key
+    :return: 
+    """
+    state = InitializeState(roundkey)
+    newstate = InvShuffleCell(MixColumn(state))
+    return StateToBinary(newstate)
+
+
+def MidoriEncrypt(plaintext, key, r):
     """
     Performs Midori 128 bit encryption
     :param plaintext:   the plaintext (as binary)
     :param key: the key (as binary)
     :return: The ciphertext (as hex)
     """
-    plaintext = plaintext[2:].zfill(128)  # Remove the binary prefix in the binary strings, and pad with zeros
+    # Convert from hexadecimal to binary
+    plaintext = bin(int(plaintext, 16))
+    key = bin(int(key, 16))
+    # Remove the binary prefix in the binary strings, and pad with zeros
+    plaintext = plaintext[2:].zfill(128)
     key = key[2:].zfill(128)
-    r = 20  # Number of rounds
+    # Load plaintext in state
     state = InitializeState(plaintext)
     state = KeyAdd(state, key)
     print("Hex:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
+    # Generate round keys
     RKs = RoundKeyGen(key)
-    # This is where the magic happens
     for i in range(r - 1):
         state = SubCell(state)
         print("Hex state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
@@ -330,19 +374,52 @@ def MidoriEncrypt(plaintext, key):
     return "0x{0:02x}".format(ciphertext)
 
 
+def MidoriDecrypt(ciphertext, key, r):
+    # Convert from hexadecimal to binary
+    ciphertext = bin(int(ciphertext, 16))
+    key = bin(int(key, 16))
+    # Remove the binary prefix in the binary strings, and pad with zeros
+    ciphertext = ciphertext[2:].zfill(128)
+    key = key[2:].zfill(128)
+    # Load ciphertext in state
+    state = InitializeState(ciphertext)
+    state = KeyAdd(state, key)
+    print("Hex:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
+    # Generate round keys
+    RKs = RoundKeyGen(key)
+    # In decryption, round keys are used in reverse order
+    RKs = list(reversed(RKs))
+    for i in range(r - 1):
+        state = SubCell(state)
+        print("Hex state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
+        state = MixColumn(state)
+        print("Hex state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
+        state = InvShuffleCell(state)
+        print("Hex state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
+        state = KeyAdd(state, LinearInverse(RKs[i]))
+        print("Hex state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
+    state = SubCell(state)
+    x = KeyAdd(state, key)
+    plaintext = int(StateToBinary(x), 2)
+    print("The plaintext is as follows:\n0x{0:02x}\n".format(plaintext))
+    return "0x{0:02x}".format(plaintext)
+
+
 def main():
     # Midori 128 implementation
-    # Convert input, given as hex, to binary (padded with zeros)
-    plaintext = bin(0x51084CE6E73A5CA2EC87D7BABC297543)
-    key = bin(0x687DED3B3C85B3F35B1009863E2A8CBF)
-    ciphertext = "0x1E0AC4FDDFF71B4C1801B73EE4AFC83D".lower()
-    c = MidoriEncrypt(plaintext, key)
-    if c != ciphertext:
-        print("The ciphertexts were not the same.")
-        print("Expected ciphertext:\t{}".format(ciphertext))
-        print("Calculated ciphertext:\t{}".format(c))
+    plaintext = "0x51084ce6e73a5ca2ec87d7babc297543"
+    key = "0x687ded3b3c85b3f35b1009863e2a8cbf"
+    r = 20  # Number of rounds
+    c = MidoriEncrypt(plaintext, key, r)
+    p = MidoriDecrypt(c, key, r)
+    if p.lower() == plaintext.lower() or int(p, 16) == int(plaintext, 16):
+        print("Encryption and decryption working as expected.")
+        print("Encryption of {} lead to the ciphertext: {}".format(plaintext, c))
+        print("Decryption of {} lead to the plaintext: {}".format(c, p))
     else:
-        print("The ciphertexts were the same!")
+        print("Encryption and decryption not working as expected.")
+        print("Encryption of {} lead to the ciphertext: {}".format(plaintext, c))
+        print("Decryption of {} lead to the plaintext: {}".format(c, p))
 
 
 if __name__ == "__main__":
