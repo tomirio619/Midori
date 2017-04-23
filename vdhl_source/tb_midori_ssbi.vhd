@@ -26,7 +26,7 @@ signal true_o : STD_LOGIC_VECTOR(7 downto 0);
 
 signal test_error : STD_LOGIC;
 
-type test_array is array (integer range <>)  of STD_LOGIC_VECTOR(7 downto 0);
+type test_array is array (integer range <>) of STD_LOGIC_VECTOR(7 downto 0);
 
 constant test_input : test_array(1 to number_of_tests) := (
 X"39",

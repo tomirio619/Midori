@@ -7,15 +7,19 @@ SBOX_OBJ=\
 	midori_ssbi.o
 TB_SBOX=tb_midori_ssbi
 
-MIXCOLUMNS_OBJ=\
-	aes_multiply_x_gf_2.o \
-	aes_mixcolumn_multiplication.o \
-	aes_mixcolumns.o
-TB_MIXCOLUMNS=tb_aes_mixcolumns
+SUBCELL_OBJ=\
+	midori_sb1.o \
+	midori_ssbi.o \
+	midori_subcell.o
+TB_SUBCELL=tb_midori_subcell
 
-SHIFTROWS_OBJ=\
-	aes_shiftrows.o
-TB_SHIFTROWS=tb_aes_shiftrows
+MIXCOLUMNS_OBJ=\
+	midori_mixcolumn.o
+TB_MIXCOLUMNS=tb_midori_mixcolumn
+
+SHUFFLECELL_OBJ=\
+	midori_shufflecell.o
+TB_SHUFFLECELL=tb_midori_shufflecell
 
 CORE_OBJ=\
 	$(SHIFTROWS_OBJ)\
@@ -36,20 +40,25 @@ test_sbox: $(SBOX_OBJ)
 	$(GHDL) -e $(GHDLFLAGS) $(TB_SBOX)
 	$(GHDL) -r $(GHDLFLAGS) $(TB_SBOX) --wave=$(TB_SBOX).ghw
 
-test_core: $(CORE_OBJ)
-	$(GHDL) -a $(GHDLFLAGS) $(TB_CORE).vhd
-	$(GHDL) -e $(GHDLFLAGS) $(TB_CORE)
-	$(GHDL) -r $(GHDLFLAGS) $(TB_CORE) --wave=$(TB_CORE).ghw
+test_subcell: $(SUBCELL_OBJ)
+	$(GHDL) -a $(GHDLFLAGS) $(TB_SUBCELL).vhd
+	$(GHDL) -e $(GHDLFLAGS) $(TB_SUBCELL)
+	$(GHDL) -r $(GHDLFLAGS) $(TB_SUBCELL) --wave=$(TB_SUBCELL).ghw
 
 test_mixcolumns: $(MIXCOLUMNS_OBJ)
 	$(GHDL) -a $(GHDLFLAGS) $(TB_MIXCOLUMNS).vhd
 	$(GHDL) -e $(GHDLFLAGS) $(TB_MIXCOLUMNS)
 	$(GHDL) -r $(GHDLFLAGS) $(TB_MIXCOLUMNS) --wave=$(TB_MIXCOLUMNS).ghw
 
-test_shiftrows: $(SHIFTROWS_OBJ)
-	$(GHDL) -a $(GHDLFLAGS) $(TB_SHIFTROWS).vhd
-	$(GHDL) -e $(GHDLFLAGS) $(TB_SHIFTROWS)
-	$(GHDL) -r $(GHDLFLAGS) $(TB_SHIFTROWS) --wave=$(TB_SHIFTROWS).ghw
+test_shufflecell: $(SHUFFLECELL_OBJ)
+	$(GHDL) -a $(GHDLFLAGS) $(TB_SHUFFLECELL).vhd
+	$(GHDL) -e $(GHDLFLAGS) $(TB_SHUFFLECELL)
+	$(GHDL) -r $(GHDLFLAGS) $(TB_SHUFFLECELL) --wave=$(TB_SHUFFLECELL).ghw
+
+test_core: $(CORE_OBJ)
+	$(GHDL) -a $(GHDLFLAGS) $(TB_CORE).vhd
+	$(GHDL) -e $(GHDLFLAGS) $(TB_CORE)
+	$(GHDL) -r $(GHDLFLAGS) $(TB_CORE) --wave=$(TB_CORE).ghw
 
 # Binary depends on the object file
 %: %.o
