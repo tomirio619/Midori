@@ -21,6 +21,16 @@ SHUFFLECELL_OBJ=\
 	midori_shufflecell.o
 TB_SHUFFLECELL=tb_midori_shufflecell
 
+INVSHUFFLECELL_OBJ=\
+	midori_invshufflecell.o
+TB_INVSHUFFLECELL=tb_midori_invshufflecell
+
+ROUNDCONSTANTS_ENC_OBJ=\
+	midori_roundconstants_enc.o
+TB_ROUNDCONSTANTS_ENC=tb_midori_roundconstants_enc
+
+
+
 CORE_OBJ=\
 	$(SHIFTROWS_OBJ)\
 	$(MIXCOLUMNS_OBJ)\
@@ -54,6 +64,16 @@ test_shufflecell: $(SHUFFLECELL_OBJ)
 	$(GHDL) -a $(GHDLFLAGS) $(TB_SHUFFLECELL).vhd
 	$(GHDL) -e $(GHDLFLAGS) $(TB_SHUFFLECELL)
 	$(GHDL) -r $(GHDLFLAGS) $(TB_SHUFFLECELL) --wave=$(TB_SHUFFLECELL).ghw
+
+test_invshufflecell: $(INVSHUFFLECELL_OBJ)
+	$(GHDL) -a $(GHDLFLAGS) $(TB_INVSHUFFLECELL).vhd
+	$(GHDL) -e $(GHDLFLAGS) $(TB_INVSHUFFLECELL)
+	$(GHDL) -r $(GHDLFLAGS) $(TB_INVSHUFFLECELL) --wave=$(TB_INVSHUFFLECELL).ghw
+
+test_roundconstants_enc: $(ROUNDCONSTANTS_ENC_OBJ)
+	$(GHDL) -a $(GHDLFLAGS) $(TB_ROUNDCONSTANTS_ENC).vhd
+	$(GHDL) -e $(GHDLFLAGS) $(TB_ROUNDCONSTANTS_ENC)
+	$(GHDL) -r $(GHDLFLAGS) $(TB_ROUNDCONSTANTS_ENC) --wave=$(TB_ROUNDCONSTANTS_ENC).ghw
 
 test_core: $(CORE_OBJ)
 	$(GHDL) -a $(GHDLFLAGS) $(TB_CORE).vhd

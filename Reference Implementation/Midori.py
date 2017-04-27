@@ -74,7 +74,7 @@ def ShuffleCell(state):
     :param state: The current state matrix S.
     :return: Permuted state matrix S
     """
-    print("ShuffleCell, 'before' state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
+    # print("ShuffleCell, 'before' state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
     sDict = {}
     for col in range(4):
         for row in range(4):
@@ -86,7 +86,7 @@ def ShuffleCell(state):
         [sDict['s5'], sDict['s11'], sDict['s12'], sDict['s2']],
         [sDict['s15'], sDict['s1'], sDict['s6'], sDict['s8']]
     ])
-    print("ShuffleCell, 'after' state:\n{0:02x}\n".format(int(StateToBinary(newState), 2)))
+    # print("ShuffleCell, 'after' state:\n{0:02x}\n".format(int(StateToBinary(newState), 2)))
     return newState
 
 
@@ -252,6 +252,7 @@ def RoundKeyGen(key):
     :param key: The initial key (either encryption or decryption
     :return: The round keys derived from the initial key
     """
+    print("The original key is:", hex(int(key, 2))[2:].zfill(32))
     roundKeys = []
     keyBytes = SplitByN(key, 8)  # Split current round key into an array of bytes
     for r in range(19):
@@ -269,6 +270,8 @@ def RoundKeyGen(key):
             newRoundKeyBytes.append(newRoundKeyByte)
         roundKey = ''.join(newRoundKeyBytes)  # Reconstruct round key
         roundKeys.append(roundKey)
+        print(hex(int(roundKey, 2))[2:].zfill(32))
+    print(len(roundKeys))
     return roundKeys
 
 
@@ -314,7 +317,7 @@ def InvShuffleCell(state):
     :param state: The current state matrix S.
     :return: Permuted state matrix S
     """
-    # print("InvShuffleCell, original state:\n{}\n".format(state))
+    # print("InvShuffleCell, original state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
     sDict = {}
     for col in range(4):
         for row in range(4):
@@ -326,8 +329,29 @@ def InvShuffleCell(state):
         [sDict['s14'], sDict['s11'], sDict['s1'], sDict['s4']],
         [sDict['s9'], sDict['s12'], sDict['s6'], sDict['s3']]
     ])
-    # print("InvShuffleCell, new state:\n{}\n".format(newState))
+    # print("InvShuffleCell, new state:\n{0:02x}\n".format(int(StateToBinary(newState), 2)))
     return newState
+
+
+def RoundConstantsToBin(encryption=False):
+    print("Round constants to bin")
+    binRKs = []
+    for RK in roundConstants:
+        binRK = ""
+        for i in range(16):
+            # loop through round constant matrix and XOR with LSB bit of current byte of key
+            # Calculate the 2d index from the 1d index
+            col = floor(i / 4)
+            row = i % 4
+            bit = RK[row, col]  # Take the value from the round constant
+            # print("The bit has value ", bit)
+            byte = bin(bit)[2:].zfill(8)
+            # print("Expanded value becomes", byte)
+            binRK += byte  # Expand the single bit to a byte
+        if not encryption:
+            binRK = LinearInverse(binRK)
+        binRKs.append(binRK)
+        print(hex(int(binRK, 2))[2:].zfill(32))
 
 
 def LinearInverse(roundkey):
@@ -425,6 +449,8 @@ def main():
         print("Encryption and decryption not working as expected.")
         print("Encryption of {} lead to the ciphertext: {}".format(plaintext, c))
         print("Decryption of {} lead to the plaintext: {}".format(c, p))
+
+    RoundConstantsToBin()
 
 
 if __name__ == "__main__":
