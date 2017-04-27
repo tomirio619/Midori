@@ -35,4 +35,4 @@ and a square inside, that is your "Zoom to fit". After you press it you should h
 entire simulation.
 * The more you click, the deeper you go into the design. Add as many signals if you want.
 * You can also save the current preset of the signals. In GTKwave, go to `File -> Write Save File As` (Ctrl + Shift + S).
-Now choose a name and safe the preset. The next time you want to load this preset, you do the following: go to `File -> Read Save File` (Ctrl + O). This wil load all the signals that you were stored in this preset.
+Now choose a name and safe the preset. The next time you want to load this preset, you do the following: go to `File -> Read Save File` (Ctrl + O). This wil load all the signals that were stored in this preset.
