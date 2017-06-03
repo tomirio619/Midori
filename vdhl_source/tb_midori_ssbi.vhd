@@ -82,7 +82,7 @@ process
 		wait for PERIOD;
 		for I in 1 to number_of_tests loop
 			test_error <= '0';
-			test_i <= STD_LOGIC_VECTOR(to_unsigned(I - 1, 4));
+			test_i <= STD_LOGIC_VECTOR(to_unsigned((I - 1), 4));
 			test_a <= test_input(I);
 			true_o <= test_output(I);
 			wait for PERIOD;

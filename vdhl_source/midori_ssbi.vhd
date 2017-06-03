@@ -33,16 +33,16 @@ signal output_sb11 : STD_LOGIC_VECTOR (3 downto 0);
 
 begin
 -- The actual "implementation" of this entity
-
-input_sb10 <= 	a(3) & a(6) & a(1) & a(4) when to_integer(unsigned(i)) = 0 else
-			  	a(6) & a(1) & a(0) & a(7) when to_integer(unsigned(i)) = 1 else
-			  	a(5) & a(4) & a(3) & a(6) when to_integer(unsigned(i)) = 2 else
+-- Not et
+input_sb10 <= 	a(3) & a(6) & a(1) & a(4) when to_integer(unsigned(i)) mod 4 = 0 else
+			  	a(6) & a(1) & a(0) & a(7) when to_integer(unsigned(i)) mod 4 = 1 else
+			  	a(5) & a(4) & a(3) & a(6) when to_integer(unsigned(i)) mod 4 = 2 else
 			  	a(0) & a(3) & a(6) & a(5); -- when ctr = 3
 
 
-input_sb11 <= 	a(7) & a(2) & a(5) & a(0) when to_integer(unsigned(i)) = 0 else
-			  	a(2) & a(5) & a(4) & a(3) when to_integer(unsigned(i)) = 1 else
-			  	a(1) & a(0) & a(7) & a(2) when to_integer(unsigned(i)) = 2 else
+input_sb11 <= 	a(7) & a(2) & a(5) & a(0) when to_integer(unsigned(i)) mod 4 = 0 else
+			  	a(2) & a(5) & a(4) & a(3) when to_integer(unsigned(i)) mod 4 = 1 else
+			  	a(1) & a(0) & a(7) & a(2) when to_integer(unsigned(i)) mod 4 = 2 else
 			  	a(4) & a(7) & a(2) & a(1); -- when ctr = 3
 
 -- Port maps explained: http://vhdlguru.blogspot.nl/2010/03/usage-of-components-and-port-mapping.html
@@ -60,9 +60,9 @@ sb11 : midori_sb1
 		o => output_sb11
 	);
 
-o <= 	output_sb11(3) & output_sb10(2) & output_sb11(1) & output_sb10(0) & output_sb10(3) & output_sb11(2) & output_sb10(1) & output_sb11(0) when to_integer(unsigned(i)) = 0 else
-		output_sb10(0) & output_sb10(3) & output_sb11(2) & output_sb11(1) & output_sb11(0) & output_sb11(3) & output_sb10(2) & output_sb10(1) when to_integer(unsigned(i)) = 1 else
-		output_sb11(1) & output_sb10(0) & output_sb10(3) & output_sb10(2) & output_sb10(1) & output_sb11(0) & output_sb11(3) & output_sb11(2) when to_integer(unsigned(i)) = 2 else	
+o <= 	output_sb11(3) & output_sb10(2) & output_sb11(1) & output_sb10(0) & output_sb10(3) & output_sb11(2) & output_sb10(1) & output_sb11(0) when to_integer(unsigned(i)) mod 4 = 0 else
+		output_sb10(0) & output_sb10(3) & output_sb11(2) & output_sb11(1) & output_sb11(0) & output_sb11(3) & output_sb10(2) & output_sb10(1) when to_integer(unsigned(i)) mod 4 = 1 else
+		output_sb11(1) & output_sb10(0) & output_sb10(3) & output_sb10(2) & output_sb10(1) & output_sb11(0) & output_sb11(3) & output_sb11(2) when to_integer(unsigned(i)) mod 4 = 2 else	
 		output_sb11(2) & output_sb10(1) & output_sb10(0) & output_sb11(3) & output_sb10(2) & output_sb11(1) & output_sb11(0) & output_sb10(3);
 
 end;

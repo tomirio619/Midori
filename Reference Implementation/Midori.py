@@ -6,6 +6,9 @@ from constants import roundConstants
 from sboxes import Sb1
 
 
+arguments = []
+outputs = []
+
 def SSbi(x, i):
     """
     Implements the Sbox within midori.
@@ -63,7 +66,10 @@ def SubCell(state):
             permuted = SSbi(si, i % 4)
             # print("SubCell permuted state:{:02x}".format(permuted))
             state[row, col] = permuted
+            arguments.append(si)
+            outputs.append(permuted)
     # print("SubCell, 'after' state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
+    printTestVectors()
     return state
 
 
@@ -432,6 +438,13 @@ def MidoriDecrypt(ciphertext, key, r):
     plaintext = int(StateToBinary(x), 2)
     print("The plaintext is as follows:\n0x{0:02x}\n".format(plaintext))
     return "0x{0:02x}".format(plaintext)
+
+
+def printTestVectors():
+    for a in arguments:
+        print("Original value: {:02x}".format(a))
+    for o in outputs:
+        print("Output value: {:02x}".format(o))
 
 
 def main():

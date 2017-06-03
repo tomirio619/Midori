@@ -2,6 +2,7 @@
 GHDL=ghdl
 GHDLFLAGS=--ieee=synopsys
 
+
 SBOX_OBJ=\
 	midori_sb1.o \
 	midori_ssbi.o
@@ -30,7 +31,6 @@ ROUNDCONSTANTS_ENC_OBJ=\
 TB_ROUNDCONSTANTS_ENC=tb_midori_roundconstants_enc
 
 
-
 CORE_OBJ=\
 	$(SHIFTROWS_OBJ)\
 	$(MIXCOLUMNS_OBJ)\
@@ -43,7 +43,6 @@ CORE_OBJ=\
 	aes128_core_state_machine.o \
 	aes128_core.o
 TB_CORE=tb_aes128_core
-
 
 test_sbox: $(SBOX_OBJ)
 	$(GHDL) -a $(GHDLFLAGS) $(TB_SBOX).vhd

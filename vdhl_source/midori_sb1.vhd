@@ -11,7 +11,7 @@ end midori_sb1;
 
 architecture behavior of midori_sb1 is
 
-type table is array (0 to 15) of STD_LOGIC_VECTOR(127 downto 0);
+type table is array (0 to 15) of STD_LOGIC_VECTOR(3 downto 0);
 
 constant sb1_table : table := (
 X"1", 
