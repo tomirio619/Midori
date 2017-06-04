@@ -14,7 +14,6 @@ architecture behavior of tb_midori_shufflecell is
 component midori_shufflecell
     Port(
         a : in STD_LOGIC_VECTOR(127 downto 0);      
-        enc_dec: in STD_LOGIC;
         o : out STD_LOGIC_VECTOR(127 downto 0)
     );
 end component;
@@ -25,7 +24,6 @@ signal test_o : STD_LOGIC_VECTOR(127 downto 0);
 signal true_o : STD_LOGIC_VECTOR(127 downto 0);
 
 signal test_error : STD_LOGIC;
-signal enc_dec: STD_LOGIC;
 
 type test_array is array (integer range <>) of STD_LOGIC_VECTOR(127 downto 0);
 
@@ -60,7 +58,6 @@ begin
 test : midori_shufflecell
     Port Map(
         a => test_a,
-        enc_dec => enc_dec,
         o => test_o
     );
 
@@ -68,7 +65,6 @@ process
     begin
         report "Start shuffle cell test." severity note;
         test_error <= '0';
-        enc_dec <= '1';
         wait for PERIOD;
         for I in 1 to number_of_tests loop
             test_error <= '0';

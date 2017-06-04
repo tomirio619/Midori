@@ -2,19 +2,18 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.all;
 
-entity tb_midori_invshufflecell is
+entity tb_midori_inv_shufflecell is
     Generic(
         PERIOD : time := 100 ns;
         number_of_tests : integer := 10
     );
-end tb_midori_invshufflecell;
+end tb_midori_inv_shufflecell;
 
-architecture behavior of tb_midori_invshufflecell is
+architecture behavior of tb_midori_inv_shufflecell is
 
-component midori_invshufflecell
+component midori_inv_shufflecell
     Port(
         a : in STD_LOGIC_VECTOR(127 downto 0);      
-        enc_dec: in STD_LOGIC;
         o : out STD_LOGIC_VECTOR(127 downto 0)
     );
 end component;
@@ -25,7 +24,6 @@ signal test_o : STD_LOGIC_VECTOR(127 downto 0);
 signal true_o : STD_LOGIC_VECTOR(127 downto 0);
 
 signal test_error : STD_LOGIC;
-signal enc_dec: STD_LOGIC;
 
 type test_array is array (integer range <>) of STD_LOGIC_VECTOR(127 downto 0);
 
@@ -57,10 +55,9 @@ X"ab0babd47d2f4319989ebe4bcd0dc4f8"
 
 begin
 
-test : midori_invshufflecell
+test : midori_inv_shufflecell
     Port Map(
         a => test_a,
-        enc_dec => enc_dec,
         o => test_o
     );
 
@@ -68,7 +65,6 @@ process
     begin
         report "Start inverse shuffle cell test." severity note;
         test_error <= '0';
-        enc_dec <= '1';
         wait for PERIOD;
         for I in 1 to number_of_tests loop
             test_error <= '0';

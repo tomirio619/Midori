@@ -2,15 +2,14 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
-entity midori_invshufflecell is
+entity midori_inv_shufflecell is
 	Port(
 		a : in STD_LOGIC_VECTOR(127 downto 0);		
-		enc_dec: in STD_LOGIC;
 		o : out STD_LOGIC_VECTOR(127 downto 0)
 	);
-end midori_invshufflecell;
+end midori_inv_shufflecell;
 
-architecture behavior of midori_invshufflecell is
+architecture behavior of midori_inv_shufflecell is
 
 begin
 

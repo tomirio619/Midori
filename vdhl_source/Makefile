@@ -22,27 +22,32 @@ SHUFFLECELL_OBJ=\
 	midori_shufflecell.o
 TB_SHUFFLECELL=tb_midori_shufflecell
 
-INVSHUFFLECELL_OBJ=\
-	midori_invshufflecell.o
-TB_INVSHUFFLECELL=tb_midori_invshufflecell
+INV_SHUFFLECELL_OBJ=\
+	midori_inv_shufflecell.o
+TB_INV_SHUFFLECELL=tb_midori_inv_shufflecell
 
 ROUNDCONSTANTS_ENC_OBJ=\
 	midori_roundconstants_enc.o
 TB_ROUNDCONSTANTS_ENC=tb_midori_roundconstants_enc
 
+ROUNDCONSTANTS_DEC_OBJ=\
+	$(INV_SHUFFLECELL_OBJ)\
+	$(MIXCOLUMNS_OBJ)\
+	midori_roundconstants_dec.o
+TB_ROUNDCONSTANTS_DEC=tb_midori_roundconstants_dec
 
 CORE_OBJ=\
-	$(SHIFTROWS_OBJ)\
+	$(SUBCELL_OBJ)\
 	$(MIXCOLUMNS_OBJ)\
-	aes_inverse_multiply_x_gf_2.o \
-	aes_addroundkeys.o \
-	aes_all_rounds_keys.o \
-	aes_sbox.o \
-	aes_subbytes.o \
-	aes_update_key.o \
-	aes128_core_state_machine.o \
-	aes128_core.o
-TB_CORE=tb_aes128_core
+	$(SHUFFLECELL_OBJ)\
+	$(INV_SHUFFLECELL_OBJ)\
+	$(ROUNDCONSTANTS_DEC_OBJ)\
+	midori_key_add.o\
+	midori_roundconstants_enc\
+	midori_roundconstants_dec.o\
+	midori_core_state_machine.o \
+	midori_core.o
+TB_CORE=tb_midori_core
 
 test_sbox: $(SBOX_OBJ)
 	$(GHDL) -a $(GHDLFLAGS) $(TB_SBOX).vhd
@@ -64,15 +69,20 @@ test_shufflecell: $(SHUFFLECELL_OBJ)
 	$(GHDL) -e $(GHDLFLAGS) $(TB_SHUFFLECELL)
 	$(GHDL) -r $(GHDLFLAGS) $(TB_SHUFFLECELL) --wave=$(TB_SHUFFLECELL).ghw
 
-test_invshufflecell: $(INVSHUFFLECELL_OBJ)
-	$(GHDL) -a $(GHDLFLAGS) $(TB_INVSHUFFLECELL).vhd
-	$(GHDL) -e $(GHDLFLAGS) $(TB_INVSHUFFLECELL)
-	$(GHDL) -r $(GHDLFLAGS) $(TB_INVSHUFFLECELL) --wave=$(TB_INVSHUFFLECELL).ghw
+test_inv_shufflecell: $(INV_SHUFFLECELL_OBJ)
+	$(GHDL) -a $(GHDLFLAGS) $(TB_INV_SHUFFLECELL).vhd
+	$(GHDL) -e $(GHDLFLAGS) $(TB_INV_SHUFFLECELL)
+	$(GHDL) -r $(GHDLFLAGS) $(TB_INV_SHUFFLECELL) --wave=$(TB_INV_SHUFFLECELL).ghw
 
 test_roundconstants_enc: $(ROUNDCONSTANTS_ENC_OBJ)
 	$(GHDL) -a $(GHDLFLAGS) $(TB_ROUNDCONSTANTS_ENC).vhd
 	$(GHDL) -e $(GHDLFLAGS) $(TB_ROUNDCONSTANTS_ENC)
 	$(GHDL) -r $(GHDLFLAGS) $(TB_ROUNDCONSTANTS_ENC) --wave=$(TB_ROUNDCONSTANTS_ENC).ghw
+
+test_roundconstants_dec: $(ROUNDCONSTANTS_DEC_OBJ)
+	$(GHDL) -a $(GHDLFLAGS) $(TB_ROUNDCONSTANTS_DEC).vhd
+	$(GHDL) -e $(GHDLFLAGS) $(TB_ROUNDCONSTANTS_DEC)
+	$(GHDL) -r $(GHDLFLAGS) $(TB_ROUNDCONSTANTS_DEC) --wave=$(TB_ROUNDCONSTANTS_DEC).ghw
 
 test_core: $(CORE_OBJ)
 	$(GHDL) -a $(GHDLFLAGS) $(TB_CORE).vhd

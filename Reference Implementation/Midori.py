@@ -69,7 +69,7 @@ def SubCell(state):
             arguments.append(si)
             outputs.append(permuted)
     # print("SubCell, 'after' state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
-    printTestVectors()
+    # printTestVectors()
     return state
 
 
@@ -276,8 +276,8 @@ def RoundKeyGen(key):
             newRoundKeyBytes.append(newRoundKeyByte)
         roundKey = ''.join(newRoundKeyBytes)  # Reconstruct round key
         roundKeys.append(roundKey)
-        print(hex(int(roundKey, 2))[2:].zfill(32))
-    print(len(roundKeys))
+        # print(hex(int(roundKey, 2))[2:].zfill(32))
+    # print(len(roundKeys))
     return roundKeys
 
 
@@ -339,7 +339,7 @@ def InvShuffleCell(state):
     return newState
 
 
-def RoundConstantsToBin(encryption=False):
+def RoundConstantsToBin(encryption=True):
     print("Round constants to bin")
     binRKs = []
     for RK in roundConstants:
@@ -357,7 +357,8 @@ def RoundConstantsToBin(encryption=False):
         if not encryption:
             binRK = LinearInverse(binRK)
         binRKs.append(binRK)
-        print(hex(int(binRK, 2))[2:].zfill(32))
+        # print(hex(int(binRK, 2))[2:].zfill(32))
+        print(binRK)
 
 
 def LinearInverse(roundkey):
@@ -387,6 +388,8 @@ def MidoriEncrypt(plaintext, key, r):
     # Remove the binary prefix in the binary strings, and pad with zeros
     plaintext = plaintext[2:].zfill(128)
     key = key[2:].zfill(128)
+    print("Plaintext", plaintext)
+    print("key", key)
     # Load plaintext in state
     state = InitializeState(plaintext)
     state = KeyAdd(state, key)
@@ -395,13 +398,14 @@ def MidoriEncrypt(plaintext, key, r):
     RKs = RoundKeyGen(key)
     for i in range(r - 1):
         state = SubCell(state)
-        # print("Hex state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
+        print("Hex state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
         state = ShuffleCell(state)
-        # print("Hex state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
+        print("Hex state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
         state = MixColumn(state)
-        # print("Hex state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
+        print("Hex state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
         state = KeyAdd(state, RKs[i])
-        # print("Hex state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
+        print("Hex state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
+        print("-----------------------------------------------------------")
     state = SubCell(state)
     y = KeyAdd(state, key)
     ciphertext = int(StateToBinary(y), 2)
@@ -416,6 +420,7 @@ def MidoriDecrypt(ciphertext, key, r):
     # Remove the binary prefix in the binary strings, and pad with zeros
     ciphertext = ciphertext[2:].zfill(128)
     key = key[2:].zfill(128)
+    print("Ciphertext:", ciphertext)
     # Load ciphertext in state
     state = InitializeState(ciphertext)
     state = KeyAdd(state, key)
@@ -464,6 +469,8 @@ def main():
         print("Decryption of {} lead to the plaintext: {}".format(c, p))
 
     RoundConstantsToBin()
+    print("---")
+    print(bin(int("0xED0DF07D6CA82EDCEFA3E7543458C230", 16) ^ int("0xED0CF17D6CA82FDCEFA3E7553458C331", 16))[2:].zfill(128))
 
 
 if __name__ == "__main__":
