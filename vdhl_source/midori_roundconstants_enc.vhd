@@ -4,7 +4,6 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity midori_roundconstants_enc is
 	Port(
-		a : in STD_LOGIC_VECTOR(127 downto 0);
 		i : in STD_LOGIC_VECTOR(4 downto 0); 
 		o : out STD_LOGIC_VECTOR(127 downto 0)
 	);
@@ -12,7 +11,7 @@ end midori_roundconstants_enc ;
 
 architecture behavior of midori_roundconstants_enc is
 
-type table is array (0 to 18) of STD_LOGIC_VECTOR(127 downto 0);
+type table is array (0 to 19) of STD_LOGIC_VECTOR(127 downto 0);
 
 constant round_constants_enc : table := (
 X"00000001000100010100010100000101",
@@ -33,12 +32,13 @@ X"01010001010101010100000100000000",
 X"00010101010100000100000000000001",
 X"00000001010100000000010000010000",
 X"00000100000001010100010100010000",
-X"00010100000001000100000001000100"
+X"00010100000001000100000001000100",
+X"00000000000000000000000000000000"
 );
 
 begin 
 
-o <= round_constants_enc(to_integer(unsigned(i))) xor a;
+o <= round_constants_enc(to_integer(unsigned(i)));
 
 end;
 

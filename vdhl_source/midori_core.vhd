@@ -81,7 +81,6 @@ end component;
 
 component midori_roundconstants_enc
     Port(
-        a : in STD_LOGIC_VECTOR(127 downto 0);
         i : in STD_LOGIC_VECTOR(4 downto 0); 
         o : out STD_LOGIC_VECTOR(127 downto 0)
     );
@@ -89,7 +88,6 @@ end component;
 
 component midori_roundconstants_dec
     Port(
-        a : in STD_LOGIC_VECTOR(127 downto 0);
         i : in STD_LOGIC_VECTOR(4 downto 0); 
         o : out STD_LOGIC_VECTOR(127 downto 0)
     );
@@ -108,8 +106,6 @@ signal intermediate_text_mixcolumn : STD_LOGIC_VECTOR(127 downto 0);
 
 signal intermediate_text_add_key_after_mix_enc: STD_LOGIC_VECTOR(127 downto 0);
 signal intermediate_text_add_key_after_mix_dec: STD_LOGIC_VECTOR(127 downto 0);
-signal intermediate_text_add_round_constant_enc: STD_LOGIC_VECTOR(127 downto 0);
-signal intermediate_text_add_round_constant_dec: STD_LOGIC_VECTOR(127 downto 0);
 signal intermediate_text_final_add_key : STD_LOGIC_VECTOR(127 downto 0);
 
 signal new_intermediate_text : STD_LOGIC_VECTOR(127 downto 0);
@@ -147,9 +143,9 @@ signal round_number : STD_LOGIC_VECTOR(4 downto 0);
 
 signal round_constant_rstn : STD_LOGIC;
 signal round_constant_enable : STD_LOGIC;
-signal round_constant : STD_LOGIC_VECTOR(7 downto 0);
-signal new_round_constant : STD_LOGIC_VECTOR(7 downto 0);
-signal new_round_constant_inv : STD_LOGIC_VECTOR(7 downto 0);
+signal round_constant : STD_LOGIC_VECTOR(127 downto 0);
+signal round_constant_enc : STD_LOGIC_VECTOR(127 downto 0);
+signal round_constant_dec : STD_LOGIC_VECTOR(127 downto 0);
 
 signal is_last_key : STD_LOGIC;
 signal is_last_round : STD_LOGIC;
@@ -190,23 +186,6 @@ first_add_round_key : midori_keyadd
         o => input_text_with_key
     );
 
-reg_intermediate_text : process(clk)
-    begin
-        if(rising_edge(clk)) then
-            if(clean_internal_registers = '0') then
-                intermediate_text <= (others => '0');
-            elsif(intermediate_text_enable = '1') then
-                if(sel_first_round_process = '1') then
-                    intermediate_text <= input_text_with_key;
-                else
-                    intermediate_text <= new_intermediate_text;
-                end if;
-            else
-                null;
-            end if;
-        end if;
-    end process;
-	
 round_subcell : midori_subcell
     Port Map(
         a => intermediate_text,
@@ -247,17 +226,15 @@ round_add_key_after_mix_dec : midori_keyadd
 
 round_add_round_constant_enc : midori_roundconstants_enc   
     Port Map(
-        a => round_add_round_constant_a,
         i => round_number,
-        o => intermediate_text_add_round_constant_enc
+        o => round_constant_enc
     );
 
 
 round_add_round_constant_dec : midori_roundconstants_dec
     Port Map(
-        a => round_add_round_constant_a,
         i => round_number,
-        o => intermediate_text_add_round_constant_dec
+        o => round_constant_dec
     );
     
 
@@ -268,11 +245,27 @@ final_add_round_key : midori_keyadd
         o => intermediate_text_final_add_key
     );
 
+reg_intermediate_text : process(clk)
+    begin
+        if(rising_edge(clk)) then
+            if(clean_internal_registers = '0') then
+                intermediate_text <= (others => '0');
+            elsif(intermediate_text_enable = '1') then
+                if(sel_first_round_process = '1') then
+                    intermediate_text <= input_text_with_key;
+                else
+                    intermediate_text <= new_intermediate_text;
+                end if;
+            else
+                null;
+            end if;
+        end if;
+    end process;
 
 reg_decryption_key : process(clk)
 	begin
 		if(rising_edge(clk)) then
-			if (enc_dec = '1' and sel_load_new_dec_key = '1') then
+			if (enc_dec = '0' and sel_load_new_dec_key = '1') then
 				decryption_key <= new_round_key;
 			else
 				decryption_key <= (others => '0');
@@ -288,6 +281,24 @@ reg_whitening_key : process(clk)
 			end if;
 		end if;
 	end process;
+
+
+reg_round_constant : process(clk)
+    begin
+        if(rising_edge(clk)) then
+            if(round_constant_rstn = '0' or clean_internal_registers = '0') then
+                round_constant <= (others => '0');
+            elsif(round_constant_enable = '1') then
+                if(enc_dec = '1') then
+                    round_constant <= round_constant_enc;
+                else
+                    round_constant <= round_constant_dec;
+                end if;
+            else
+                null;
+            end if;
+        end if;
+    end process;
     
 ctr_round_number : process(clk)
     begin
@@ -313,7 +324,7 @@ ctr_round_number : process(clk)
     end process;
 
 
-encryption_mode_enabled <= enc_dec or round_number_key_generation;
+encryption_mode_enabled <= enc_dec;
                            
 round_mixcolumn_a <= intermediate_text_shufflecell when (enc_dec = '1') else
 						whitening_key when (sel_generate_decryption_key  = '1') else
@@ -322,16 +333,13 @@ round_mixcolumn_a <= intermediate_text_shufflecell when (enc_dec = '1') else
 round_add_key_after_mix_a <= intermediate_text_mixcolumn when (enc_dec = '1') else
 				             	intermediate_text_inv_shufflecell;
 
-round_add_round_constant_a <= intermediate_text_add_key_after_mix_enc when (enc_dec = '1') else
-								intermediate_text_add_key_after_mix_dec;
+new_intermediate_text <= (round_constant xor intermediate_text_add_key_after_mix_enc) when (enc_dec = '1') else
+								(round_constant xor intermediate_text_add_key_after_mix_dec);
 
-new_intermediate_text <= intermediate_text_add_round_constant_enc when (enc_dec = '1') else
-								intermediate_text_add_round_constant_dec;
-
-is_last_key <= '1' when (((encryption_mode_enabled = '1') and to_integer(unsigned(round_number)) = 15) or ((encryption_mode_enabled = '0') and to_integer(unsigned(round_number)) = 1)) else '0';
+is_last_key <= '1' when (((encryption_mode_enabled = '1') and to_integer(unsigned(round_number)) = 17 ) or ((encryption_mode_enabled = '0') and to_integer(unsigned(round_number)) = 3)) else '0';
                          
 output_text <= intermediate_text_final_add_key;
 
-
+-- VHDL debugging https://stackoverflow.com/questions/5468602/debugging-vhdl-how-to
     
 end behavioral;

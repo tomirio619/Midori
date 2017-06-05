@@ -1,6 +1,6 @@
 .PHONY: clean
 GHDL=ghdl
-GHDLFLAGS=--ieee=synopsys
+GHDLFLAGS=-g --ieee=synopsys --std=93c 
 
 
 SBOX_OBJ=\

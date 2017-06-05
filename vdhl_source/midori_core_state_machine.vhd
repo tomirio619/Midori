@@ -136,45 +136,46 @@ update_output : process(actual_state, start_operation, is_last_key)
                 end if;
             when init_key_schedule =>
                 next_sel_load_new_enc_key <= '1';
-                next_mem_round_keys_write_key_enable <= '1';
+                next_sel_load_new_dec_key <= '1';
+                 next_mem_round_keys_write_key_enable <= '1';
                 next_round_number_key_generation <= '1';
             when wait_key_load_memory =>
 				next_sel_load_new_enc_key <= '1';
+                next_sel_load_new_dec_key <= '1';
                 next_round_number_key_generation <= '1';
             when finish_key_schedule =>
                 next_core_free <= '1';
             when init_enc_dec =>
                 next_round_number_enable <= '1';
+                next_sel_first_round_process <= '1';
+                next_intermediate_text_enable <= '1';
+                next_round_constant_enable <= '1';    
             when wait_first_round_key =>    -- If we are doing decryption, this should be the state in which we fetch the decryption key from the circuit.
-				next_sel_load_new_enc_key <= '1';
+				next_intermediate_text_enable <= '1';
+                next_sel_load_new_enc_key <= '1';
 				next_round_key_enable <= '1';
                 next_round_number_enable <= '1';
-				next_round_constant_rst	<= '0';
 				next_round_constant_enable <= '1';
             when first_round_enc_dec =>
                 next_round_key_enable <= '1';
 				next_round_number_enable <= '1';
                 next_intermediate_text_enable <= '1';
-                next_sel_first_round_process <= '1';
-				next_sel_generate_round_keys <= '1';
-				next_round_constant_enable <= '1';
+                next_round_constant_enable <= '1';
             when remaining_rounds_enc_dec =>
                 next_intermediate_text_enable <= '1';
 				next_round_key_enable <= '1';
 				next_round_number_enable <= '1';
                 next_round_constant_enable <= '1';
 				next_sel_load_enc_key <= '0';
-				next_sel_generate_round_keys <= '1';
             when last_round_enc_dec =>
                 next_intermediate_text_enable <= '1';
-				next_sel_generate_round_keys <= '1';
                 next_round_key_enable <= '1';
-                next_round_number_enable <= '1';
             when finish_enc_dec =>
+                next_intermediate_text_enable <= '1';
                 next_core_free <= '1';
                 next_is_last_round <= '1';
                 next_operation_finished <= '1';
-        end case;
+           end case;
         
     end process;
 

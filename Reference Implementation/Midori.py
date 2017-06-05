@@ -405,7 +405,7 @@ def MidoriEncrypt(plaintext, key, r):
         print("Hex state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
         state = KeyAdd(state, RKs[i])
         print("Hex state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
-        print("-----------------------------------------------------------")
+        print("---------------------------End of round {}---------------------------".format(i))
     state = SubCell(state)
     y = KeyAdd(state, key)
     ciphertext = int(StateToBinary(y), 2)

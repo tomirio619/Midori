@@ -4,7 +4,6 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity midori_roundconstants_dec is
 	Port(
-		a : in STD_LOGIC_VECTOR(127 downto 0);
 		i : in STD_LOGIC_VECTOR(4 downto 0); 
 		o : out STD_LOGIC_VECTOR(127 downto 0)
 	);
@@ -12,13 +11,10 @@ end midori_roundconstants_dec ;
 
 architecture behavior of midori_roundconstants_dec is
 
-type table is array (0 to 18) of STD_LOGIC_VECTOR(127 downto 0);
+type table is array (0 to 19) of STD_LOGIC_VECTOR(127 downto 0);
 
--- These are the round constants that should be used in decryption.
--- Note that in decryption, you apply the round constants in reverse order.
--- The round constants are placed at the index indicated by the round number.
--- Therefore, in decryption you should fed this component with an index starting from 18 downto 0.
 constant round_constants_dec : table := (
+X"00000000000000000000000000000000",
 X"01010101010100000100010000000000",
 X"01010001010000000001000100000000",
 X"01010000000101000100000101010100",
@@ -42,7 +38,7 @@ X"00010101010101010000010001000100"
 
 begin 
 
-o <= round_constants_dec(to_integer(unsigned(i))) xor a;
+o <= round_constants_dec(to_integer(unsigned(i)));
 
 end;
 
