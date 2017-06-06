@@ -1,13 +1,12 @@
-# Midori
+# Midori128
 
-This repository contains a Python implementation ofthe Midori 128 bit block cipher.
-In addition, it also contains a hardware designed of this cipher, implemented in VHDL.
+This repository contains both a Python reference implementation of the Midori 128 bit block cipher and a hardware design written in VHDL.
 
-To be able to run the VHDL project on Windows, you need to have the following things installed
+To be able to run the VHDL project on Windows, you need to have the following things installed:
 
-* CMake, can be found [here](https://cmake.org/download/). Also make sure that the corresponding `bin` folder 
-  (default location is `C:\Program Files (x86)\CMake\bin`) is added to your `PATH` variable,
-  as we will need to invoke this utility from the command line later on.
+* Make, can be installed through [Cygwin](https://www.cygwin.com/). Make sure to add the `bin` folder 
+  (default location is `C:\cygwin\bin`) to your `PATH` variable,
+  as we will need to invoke the make utility from the command line later on.
 
 * GHDL, can be found [here](https://github.com/tgingold/ghdl/releases). Also add the `bin` folder to your path 
 (default location is `C:\Program Files (x86)\ghdl-x.yz\bin`, where `x.yz` corresponds to the version you are using). 

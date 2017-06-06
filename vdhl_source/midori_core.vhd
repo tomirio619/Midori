@@ -30,12 +30,9 @@ component midori_core_state_machine
         sel_first_round_process : out STD_LOGIC;
 		sel_load_new_enc_key : out STD_LOGIC;	
 		sel_load_new_dec_key : out STD_LOGIC;
-        mem_round_keys_write_key_enable : out STD_LOGIC;
-        round_key_enable : out STD_LOGIC;
-        sel_generate_round_keys : out STD_LOGIC;
+        sel_generate_decryption_key: out STD_LOGIC;
         round_number_rstn : out STD_LOGIC;
         round_number_enable : out STD_LOGIC;
-        round_number_key_generation : out STD_LOGIC;
         round_constant_rstn : out STD_LOGIC;
         round_constant_enable : out STD_LOGIC;
         core_free : out STD_LOGIC;
@@ -122,12 +119,7 @@ signal sel_first_round_process : STD_LOGIC;
 signal sel_load_new_enc_key : STD_LOGIC;
 signal sel_load_new_dec_key : STD_LOGIC;
 
-signal mem_round_keys_input_key : STD_LOGIC_VECTOR(127 downto 0);
-signal mem_round_keys_write_key_enable : STD_LOGIC;
-signal mem_round_keys_output_key : STD_LOGIC_VECTOR(127 downto 0);
-
 signal round_key_enable : STD_LOGIC;
-signal sel_generate_round_keys : STD_LOGIC;
 signal sel_generate_decryption_key : STD_LOGIC;
 signal round_key : STD_LOGIC_VECTOR(127 downto 0);
 
@@ -138,7 +130,6 @@ signal decryption_key : STD_LOGIC_VECTOR(127 downto 0);
 
 signal round_number_rstn : STD_LOGIC;
 signal round_number_enable : STD_LOGIC;
-signal round_number_key_generation : STD_LOGIC;
 signal round_number : STD_LOGIC_VECTOR(4 downto 0);
 
 signal round_constant_rstn : STD_LOGIC;
@@ -166,12 +157,9 @@ state_machine : midori_core_state_machine
         sel_first_round_process => sel_first_round_process,
         sel_load_new_enc_key => sel_load_new_enc_key,
 		sel_load_new_dec_key => sel_load_new_dec_key,
-        mem_round_keys_write_key_enable => mem_round_keys_write_key_enable,
-        round_key_enable => round_key_enable,
-        sel_generate_round_keys => sel_generate_round_keys,
+        sel_generate_decryption_key => sel_generate_decryption_key,
         round_number_rstn => round_number_rstn,
         round_number_enable => round_number_enable,
-        round_number_key_generation => round_number_key_generation,
         round_constant_rstn => round_constant_rstn, 
         round_constant_enable => round_constant_enable,
         core_free => core_free,
@@ -200,7 +188,7 @@ round_shufflecell : midori_shufflecell
 
 round_inv_shufflecell : midori_inv_shufflecell
     Port Map(
-        a => intermediate_text_subcell,
+        a => intermediate_text_mixcolumn,
         o => intermediate_text_inv_shufflecell
     );
 
@@ -265,10 +253,12 @@ reg_intermediate_text : process(clk)
 reg_decryption_key : process(clk)
 	begin
 		if(rising_edge(clk)) then
-			if (enc_dec = '0' and sel_load_new_dec_key = '1') then
-				decryption_key <= new_round_key;
+            if(clean_internal_registers = '0') then
+                decryption_key <= (others => '0');
+			elsif (enc_dec = '0' and sel_load_new_dec_key = '1') then
+				decryption_key <= intermediate_text_inv_shufflecell;
 			else
-				decryption_key <= (others => '0');
+				null;
 			end if;
 		end if;
 	end process;
@@ -276,8 +266,12 @@ reg_decryption_key : process(clk)
 reg_whitening_key : process(clk)
 	begin
 		if(rising_edge(clk)) then
-			if(sel_load_new_enc_key = '1' or sel_load_new_dec_key = '1') then
+            if(clean_internal_registers = '0') then
+                whitening_key <= (others => '0');
+			elsif(sel_load_new_enc_key = '1' or sel_load_new_dec_key = '1') then
 				whitening_key <= input_key;
+            else
+                null;
 			end if;
 		end if;
 	end process;
@@ -336,7 +330,7 @@ round_add_key_after_mix_a <= intermediate_text_mixcolumn when (enc_dec = '1') el
 new_intermediate_text <= (round_constant xor intermediate_text_add_key_after_mix_enc) when (enc_dec = '1') else
 								(round_constant xor intermediate_text_add_key_after_mix_dec);
 
-is_last_key <= '1' when (((encryption_mode_enabled = '1') and to_integer(unsigned(round_number)) = 17 ) or ((encryption_mode_enabled = '0') and to_integer(unsigned(round_number)) = 3)) else '0';
+is_last_key <= '1' when (((encryption_mode_enabled = '1') and to_integer(unsigned(round_number)) = 17 ) or ((encryption_mode_enabled = '0') and to_integer(unsigned(round_number)) = 2)) else '0';
                          
 output_text <= intermediate_text_final_add_key;
 

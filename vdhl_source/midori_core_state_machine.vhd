@@ -13,12 +13,9 @@ entity midori_core_state_machine is
         sel_first_round_process : out STD_LOGIC;
         sel_load_new_enc_key : out STD_LOGIC;
 		sel_load_new_dec_key : out STD_LOGIC;
-        mem_round_keys_write_key_enable : out STD_LOGIC;
-        round_key_enable : out STD_LOGIC;
-        sel_generate_round_keys : out STD_LOGIC;
+        sel_generate_decryption_key : out STD_LOGIC;
         round_number_rstn : out STD_LOGIC;
         round_number_enable : out STD_LOGIC;
-        round_number_key_generation : out STD_LOGIC;
         round_constant_rstn : out STD_LOGIC;
         round_constant_enable : out STD_LOGIC;
         core_free : out STD_LOGIC;
@@ -43,14 +40,11 @@ signal next_intermediate_text_enable : STD_LOGIC;
 signal next_sel_first_round_process : STD_LOGIC;
 signal next_sel_load_new_enc_key : STD_LOGIC;
 signal next_sel_load_new_dec_key : STD_LOGIC;
-signal next_mem_round_keys_write_key_enable : STD_LOGIC;
-signal next_round_key_enable : STD_LOGIC;
-signal next_sel_generate_round_keys : STD_LOGIC;
+signal next_sel_generate_decryption_key : STD_LOGIC;
 signal next_sel_load_enc_key : STD_LOGIC;
 signal next_sel_load_dec_key : STD_LOGIC;
 signal next_round_number_rst : STD_LOGIC;
 signal next_round_number_enable : STD_LOGIC;
-signal next_round_number_key_generation : STD_LOGIC;
 signal next_round_constant_rst : STD_LOGIC;
 signal next_round_constant_enable : STD_LOGIC;
 signal next_core_free : STD_LOGIC;
@@ -68,12 +62,9 @@ update_internal_registers : process(clk, rstn)
             sel_first_round_process <= '0';
             sel_load_new_enc_key <= '0';
 	    	sel_load_new_dec_key <= '0';
-            mem_round_keys_write_key_enable <= '0';
-            round_key_enable <= '0';
-            sel_generate_round_keys <= '0';
+            sel_generate_decryption_key <= '0';
             round_number_rstn <= '0';
             round_number_enable <= '0';
-            round_number_key_generation <= '0';
             round_constant_rstn <= '0';
             round_constant_enable <= '0';
             core_free <= '0';
@@ -86,12 +77,9 @@ update_internal_registers : process(clk, rstn)
             sel_first_round_process <= next_sel_first_round_process;
             sel_load_new_enc_key <= next_sel_load_new_enc_key;
 	  		sel_load_new_dec_key <= next_sel_load_new_dec_key;
-            mem_round_keys_write_key_enable <= next_mem_round_keys_write_key_enable;
-            round_key_enable <= next_round_key_enable;
-            sel_generate_round_keys <= next_sel_generate_round_keys;
+            sel_generate_decryption_key <= next_sel_generate_decryption_key;
             round_number_rstn <= next_round_number_rst;
             round_number_enable <= next_round_number_enable;
-            round_number_key_generation <= next_round_number_key_generation;
             round_constant_rstn <= next_round_constant_rst;
             round_constant_enable <= next_round_constant_enable;
             core_free <= next_core_free;
@@ -107,12 +95,9 @@ update_output : process(actual_state, start_operation, is_last_key)
         next_sel_first_round_process <= '0';
         next_sel_load_new_enc_key <= '0';
 		next_sel_load_new_dec_key <= '0';
-        next_mem_round_keys_write_key_enable <= '0';
-        next_round_key_enable <= '0';
-        next_sel_generate_round_keys <= '0';
+        next_sel_generate_decryption_key <= '0';
         next_round_number_rst <= '1';
         next_round_number_enable <= '0';
-        next_round_number_key_generation <= '0';
         next_round_constant_rst <= '1';
         next_round_constant_enable <= '0';
         next_core_free <= '0';
@@ -126,7 +111,6 @@ update_output : process(actual_state, start_operation, is_last_key)
                 if(start_operation = "01") then
                     next_round_number_rst <= '0';
                     next_round_constant_rst <= '0';
-                    next_round_number_key_generation <= '1';
                     next_core_free <= '0';
                 elsif(start_operation = "10") then
                     next_round_number_rst <= '0';
@@ -137,12 +121,9 @@ update_output : process(actual_state, start_operation, is_last_key)
             when init_key_schedule =>
                 next_sel_load_new_enc_key <= '1';
                 next_sel_load_new_dec_key <= '1';
-                 next_mem_round_keys_write_key_enable <= '1';
-                next_round_number_key_generation <= '1';
+                next_sel_generate_decryption_key <= '1';
             when wait_key_load_memory =>
-				next_sel_load_new_enc_key <= '1';
-                next_sel_load_new_dec_key <= '1';
-                next_round_number_key_generation <= '1';
+                -- We do not have to assign anything here
             when finish_key_schedule =>
                 next_core_free <= '1';
             when init_enc_dec =>
@@ -150,26 +131,21 @@ update_output : process(actual_state, start_operation, is_last_key)
                 next_sel_first_round_process <= '1';
                 next_intermediate_text_enable <= '1';
                 next_round_constant_enable <= '1';    
-            when wait_first_round_key =>    -- If we are doing decryption, this should be the state in which we fetch the decryption key from the circuit.
+            when wait_first_round_key => 
 				next_intermediate_text_enable <= '1';
-                next_sel_load_new_enc_key <= '1';
-				next_round_key_enable <= '1';
                 next_round_number_enable <= '1';
 				next_round_constant_enable <= '1';
             when first_round_enc_dec =>
-                next_round_key_enable <= '1';
 				next_round_number_enable <= '1';
                 next_intermediate_text_enable <= '1';
                 next_round_constant_enable <= '1';
             when remaining_rounds_enc_dec =>
                 next_intermediate_text_enable <= '1';
-				next_round_key_enable <= '1';
 				next_round_number_enable <= '1';
                 next_round_constant_enable <= '1';
 				next_sel_load_enc_key <= '0';
             when last_round_enc_dec =>
                 next_intermediate_text_enable <= '1';
-                next_round_key_enable <= '1';
             when finish_enc_dec =>
                 next_intermediate_text_enable <= '1';
                 next_core_free <= '1';

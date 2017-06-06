@@ -97,11 +97,9 @@ process
             readline (ram_file, line_n);                             
             read (line_n, read_ciphertext);        
             -- Encryption Test
-            report "Reading plaintext, key and ciphertext" severity note;
             test_input_text <= read_plaintext;
             test_input_key <= read_key;
             true_output_text <= read_ciphertext;
-            report "Finished reading" severity note;
             test_enc_dec <= '1';
             test_start_operation <= "01";   -- init_key_schedule
             wait for PERIOD;
@@ -118,6 +116,7 @@ process
             report "Encryption time = " & integer'image((after_time - before_time)/(PERIOD)) & " cycles" severity note;
             if (true_output_text = test_output_text) then
                 test_error <= '0';
+                report "Encryption successful" severity error;
             else
                 test_error <= '1';
                 report "Computed values do not match expected ones" severity error;
@@ -127,16 +126,12 @@ process
             test_error <= '0';
             -- Decryption Test
             report "Start Midori128 decryption test." severity note;  
-            report "Reading plaintext, key and ciphertext" severity note;
             test_input_text <= read_ciphertext;
             test_input_key <= read_key;
             true_output_text <= read_plaintext;
-            report "Finished reading" severity note;
             test_enc_dec <= '0';
-            report "Test enc_dec put to 0" severity note;
             test_start_operation <= "01";
-            report "Init key schedule" severity note;
-            wait for PERIOD;
+                wait for PERIOD;
             test_start_operation <= "11";
             wait until test_core_free = '1';
             wait for tb_delay;    
@@ -150,6 +145,7 @@ process
             report "Decryption time = " & integer'image((after_time - before_time)/(PERIOD)) & " cycles" severity note;
             if (true_output_text = test_output_text) then
                 test_error <= '0';
+                report "Decryption successful" severity error;
             else
                 test_error <= '1';
                 report "Computed values do not match expected ones" severity error;

@@ -431,13 +431,14 @@ def MidoriDecrypt(ciphertext, key, r):
     RKs = list(reversed(RKs))
     for i in range(r - 1):
         state = SubCell(state)
-        # print("Hex state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
+        print("Hex state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
         state = MixColumn(state)
-        # print("Hex state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
+        print("Hex state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
         state = InvShuffleCell(state)
-        # print("Hex state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
+        print("Hex state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
         state = KeyAdd(state, LinearInverse(RKs[i]))
-        # print("Hex state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
+        print("Hex state:\n{0:02x}\n".format(int(StateToBinary(state), 2)))
+        print("---------------------------End of round {}---------------------------".format(18 - i))
     state = SubCell(state)
     x = KeyAdd(state, key)
     plaintext = int(StateToBinary(x), 2)
@@ -450,6 +451,15 @@ def printTestVectors():
         print("Original value: {:02x}".format(a))
     for o in outputs:
         print("Output value: {:02x}".format(o))
+
+
+def CalcKeyInverse(key):
+    key = bin(int(key, 16))
+    key = key[2:].zfill(128)
+    state = InitializeState(key)
+    newState = InvShuffleCell(MixColumn(state))
+    invKey = int(StateToBinary(newState), 2)
+    print("The inverse of the key is as follows:\n0x{0:02x}\n".format(invKey))
 
 
 def main():
@@ -468,9 +478,10 @@ def main():
         print("Encryption of {} lead to the ciphertext: {}".format(plaintext, c))
         print("Decryption of {} lead to the plaintext: {}".format(c, p))
 
-    RoundConstantsToBin()
-    print("---")
-    print(bin(int("0xED0DF07D6CA82EDCEFA3E7543458C230", 16) ^ int("0xED0CF17D6CA82FDCEFA3E7553458C331", 16))[2:].zfill(128))
+    CalcKeyInverse("0x687DED3B3C85B3F35B1009863E2A8CBF")
+    # RoundConstantsToBin()
+    # print("---")
+    # print(bin(int("0xED0DF07D6CA82EDCEFA3E7543458C230", 16) ^ int("0xED0CF17D6CA82FDCEFA3E7553458C331", 16))[2:].zfill(128))
 
 
 if __name__ == "__main__":
