@@ -80,8 +80,10 @@ process
     variable read_ciphertext : STD_LOGIC_VECTOR(127 downto 0);
     variable before_time : time;
     variable after_time : time;    
-    begin     
-        report "Start Midori128 encryption test." severity note;    
+    begin    
+        report "---------------------------------" severity note;
+        report "|Start Midori128 encryption test|" severity note; 
+        report "---------------------------------" severity note;   
         file_open(ram_file, test_memory_file_midori128, READ_MODE);
         test_rstn <= '0';
         wait for PERIOD;
@@ -125,7 +127,9 @@ process
             report "End of the encryption test." severity note;
             test_error <= '0';
             -- Decryption Test
-            report "Start Midori128 decryption test." severity note;  
+            report "---------------------------------" severity note;
+            report "|Start Midori128 decryption test|" severity note; 
+            report "---------------------------------" severity note; 
             test_input_text <= read_ciphertext;
             test_input_key <= read_key;
             true_output_text <= read_plaintext;

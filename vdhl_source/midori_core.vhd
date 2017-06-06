@@ -93,26 +93,26 @@ end component;
 
 
 
-signal input_text_with_key : STD_LOGIC_VECTOR(127 downto 0);
-signal intermediate_text : STD_LOGIC_VECTOR(127 downto 0);
-signal intermediate_text_subcell : STD_LOGIC_VECTOR(127 downto 0);
-signal intermediate_text_shufflecell : STD_LOGIC_VECTOR(127 downto 0);
-signal intermediate_text_inv_shufflecell : STD_LOGIC_VECTOR(127 downto 0);
-signal intermediate_text_add_key_before_mix : STD_LOGIC_VECTOR(127 downto 0);
-signal intermediate_text_mixcolumn : STD_LOGIC_VECTOR(127 downto 0);
+signal input_text_with_key : STD_LOGIC_VECTOR(127 downto 0) := (others => '0');
+signal intermediate_text : STD_LOGIC_VECTOR(127 downto 0) := (others => '0');
+signal intermediate_text_subcell : STD_LOGIC_VECTOR(127 downto 0) := (others => '0');
+signal intermediate_text_shufflecell : STD_LOGIC_VECTOR(127 downto 0) := (others => '0');
+signal intermediate_text_inv_shufflecell : STD_LOGIC_VECTOR(127 downto 0) := (others => '0');
+signal intermediate_text_add_key_before_mix : STD_LOGIC_VECTOR(127 downto 0) := (others => '0');
+signal intermediate_text_mixcolumn : STD_LOGIC_VECTOR(127 downto 0) := (others => '0');
 
-signal intermediate_text_add_key_after_mix_enc: STD_LOGIC_VECTOR(127 downto 0);
-signal intermediate_text_add_key_after_mix_dec: STD_LOGIC_VECTOR(127 downto 0);
-signal intermediate_text_final_add_key : STD_LOGIC_VECTOR(127 downto 0);
+signal intermediate_text_add_key_after_mix_enc: STD_LOGIC_VECTOR(127 downto 0) := (others => '0');
+signal intermediate_text_add_key_after_mix_dec: STD_LOGIC_VECTOR(127 downto 0) := (others => '0');
+signal intermediate_text_final_add_key : STD_LOGIC_VECTOR(127 downto 0) := (others => '0');
 
-signal new_intermediate_text : STD_LOGIC_VECTOR(127 downto 0);
+signal new_intermediate_text : STD_LOGIC_VECTOR(127 downto 0) := (others => '0');
 
 signal clean_internal_registers : STD_LOGIC;
 
 signal intermediate_text_enable : STD_LOGIC;
 
-signal round_add_key_after_mix_a : STD_LOGIC_VECTOR(127 downto 0);
-signal round_add_round_constant_a : STD_LOGIC_VECTOR(127 downto 0);
+signal round_add_key_after_mix_a : STD_LOGIC_VECTOR(127 downto 0) := (others => '0');
+signal round_add_round_constant_a : STD_LOGIC_VECTOR(127 downto 0) := (others => '0');
 signal round_mixcolumn_a : STD_LOGIC_VECTOR(127 downto 0);
 
 signal sel_first_round_process : STD_LOGIC;
@@ -121,22 +121,22 @@ signal sel_load_new_dec_key : STD_LOGIC;
 
 signal round_key_enable : STD_LOGIC;
 signal sel_generate_decryption_key : STD_LOGIC;
-signal round_key : STD_LOGIC_VECTOR(127 downto 0);
+signal round_key : STD_LOGIC_VECTOR(127 downto 0) := (others => '0');
 
 -- The whitening key is the original key
-signal whitening_key : STD_LOGIC_VECTOR(127 downto 0);
-signal new_round_key : STD_LOGIC_VECTOR(127 downto 0);
-signal decryption_key : STD_LOGIC_VECTOR(127 downto 0);
+signal whitening_key : STD_LOGIC_VECTOR(127 downto 0) := (others => '0');
+signal new_round_key : STD_LOGIC_VECTOR(127 downto 0) := (others => '0');
+signal decryption_key : STD_LOGIC_VECTOR(127 downto 0) := (others => '0');
 
 signal round_number_rstn : STD_LOGIC;
 signal round_number_enable : STD_LOGIC;
-signal round_number : STD_LOGIC_VECTOR(4 downto 0);
+signal round_number : STD_LOGIC_VECTOR(4 downto 0) := (others => '0');
 
 signal round_constant_rstn : STD_LOGIC;
 signal round_constant_enable : STD_LOGIC;
-signal round_constant : STD_LOGIC_VECTOR(127 downto 0);
-signal round_constant_enc : STD_LOGIC_VECTOR(127 downto 0);
-signal round_constant_dec : STD_LOGIC_VECTOR(127 downto 0);
+signal round_constant : STD_LOGIC_VECTOR(127 downto 0) := (others => '0');
+signal round_constant_enc : STD_LOGIC_VECTOR(127 downto 0) := (others => '0');
+signal round_constant_dec : STD_LOGIC_VECTOR(127 downto 0) := (others => '0');
 
 signal is_last_key : STD_LOGIC;
 signal is_last_round : STD_LOGIC;
@@ -333,7 +333,5 @@ new_intermediate_text <= (round_constant xor intermediate_text_add_key_after_mix
 is_last_key <= '1' when (((encryption_mode_enabled = '1') and to_integer(unsigned(round_number)) = 17 ) or ((encryption_mode_enabled = '0') and to_integer(unsigned(round_number)) = 2)) else '0';
                          
 output_text <= intermediate_text_final_add_key;
-
--- VHDL debugging https://stackoverflow.com/questions/5468602/debugging-vhdl-how-to
-    
+   
 end behavioral;

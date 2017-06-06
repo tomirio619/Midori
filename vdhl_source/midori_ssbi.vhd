@@ -26,10 +26,10 @@ end component;
 
 -- The signals used within this new entity.
 
-signal input_sb10 : STD_LOGIC_VECTOR (3 downto 0);
-signal output_sb10 : STD_LOGIC_VECTOR (3 downto 0);
-signal input_sb11 : STD_LOGIC_VECTOR (3 downto 0);
-signal output_sb11 : STD_LOGIC_VECTOR (3 downto 0);
+signal input_sb10 : STD_LOGIC_VECTOR (3 downto 0) := (others => '0');
+signal output_sb10 : STD_LOGIC_VECTOR (3 downto 0) := (others => '0');
+signal input_sb11 : STD_LOGIC_VECTOR (3 downto 0) := (others => '0');
+signal output_sb11 : STD_LOGIC_VECTOR (3 downto 0) := (others => '0');
 
 begin
 -- The actual "implementation" of this entity

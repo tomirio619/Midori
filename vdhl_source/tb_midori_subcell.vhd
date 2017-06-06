@@ -18,10 +18,10 @@ component midori_subcell
     );
 end component;
 
-signal test_a : STD_LOGIC_VECTOR(127 downto 0);
-signal test_i : STD_LOGIC_VECTOR (3 downto 0);
-signal test_o : STD_LOGIC_VECTOR(127 downto 0);
-signal true_o : STD_LOGIC_VECTOR(127 downto 0);
+signal test_a : STD_LOGIC_VECTOR(127 downto 0) := (others => '0');
+signal test_i : STD_LOGIC_VECTOR (3 downto 0) := (others => '0');
+signal test_o : STD_LOGIC_VECTOR(127 downto 0) := (others => '0');
+signal true_o : STD_LOGIC_VECTOR(127 downto 0) := (others => '0');
 
 signal test_error : STD_LOGIC;
 
