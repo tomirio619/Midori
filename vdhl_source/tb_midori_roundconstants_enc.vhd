@@ -13,16 +13,15 @@ architecture behavior of tb_midori_roundconstants_enc is
 
 component midori_roundconstants_enc
     Port(
-        a : in STD_LOGIC_VECTOR(127 downto 0);    
         i : in STD_LOGIC_VECTOR(4 downto 0);
         o : out STD_LOGIC_VECTOR(127 downto 0) 
     );
 end component;
 
-signal test_a : STD_LOGIC_VECTOR(127 downto 0);
-signal test_i : STD_LOGIC_VECTOR (4 downto 0);
-signal test_o : STD_LOGIC_VECTOR(127 downto 0);
-signal true_o : STD_LOGIC_VECTOR(127 downto 0);
+signal test_a : STD_LOGIC_VECTOR(127 downto 0) := (others => '0');
+signal test_i : STD_LOGIC_VECTOR (4 downto 0) := (others => '0');
+signal test_o : STD_LOGIC_VECTOR(127 downto 0) := (others => '0');
+signal true_o : STD_LOGIC_VECTOR(127 downto 0) := (others => '0');
 
 signal test_error : STD_LOGIC;
 
@@ -58,7 +57,6 @@ begin
 
 test : midori_roundconstants_enc
     Port Map(
-        a => test_a,
         i => test_i,
         o => test_o
     );
@@ -75,7 +73,7 @@ process
             test_i <= STD_LOGIC_VECTOR(to_unsigned(I - 1, 5));
             true_o <= test_output(I);
             wait for PERIOD;
-            if (true_o = test_o) then
+            if (true_o = (test_o xor test_a)) then
                 test_error <= '0';
             else
                 test_error <= '1';

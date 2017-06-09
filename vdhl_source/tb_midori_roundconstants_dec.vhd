@@ -12,8 +12,7 @@ end tb_midori_roundconstants_dec;
 architecture behavior of tb_midori_roundconstants_dec is
 
 component midori_roundconstants_dec
-    Port(
-        a : in STD_LOGIC_VECTOR(127 downto 0);    
+    Port( 
         i : in STD_LOGIC_VECTOR(4 downto 0);
         o : out STD_LOGIC_VECTOR(127 downto 0) 
     );
@@ -34,10 +33,10 @@ component midori_mixcolumn
     );
 end component;
 
-signal test_a : STD_LOGIC_VECTOR(127 downto 0);
-signal test_i : STD_LOGIC_VECTOR (4 downto 0);
-signal test_o : STD_LOGIC_VECTOR(127 downto 0);
-signal true_o : STD_LOGIC_VECTOR(127 downto 0);
+signal test_a : STD_LOGIC_VECTOR(127 downto 0) := (others => '0');
+signal test_i : STD_LOGIC_VECTOR (4 downto 0) := (others => '0');
+signal test_o : STD_LOGIC_VECTOR(127 downto 0) := (others => '0');
+signal true_o : STD_LOGIC_VECTOR(127 downto 0) := (others => '0');
 
 
 signal round_constant : STD_LOGIC_VECTOR(127 downto 0);
@@ -99,7 +98,6 @@ begin
 
 test : midori_roundconstants_dec
     Port Map(
-        a => test_a,
         i => test_i,
         o => test_o
     );
@@ -121,14 +119,11 @@ process
     begin
         report "Start roundconstants during decryption test." severity note;
         test_error <= '0';
-        -- The test_a is being XORd with the with the round constant that is selected by the round number (I in this case).
-        -- As this XOR is trivial to perform, we set the value of test_a to 0.
-        test_a <= (others => '0');
-        wait for PERIOD;
+          wait for PERIOD;
         for I in 1 to number_of_tests loop
             wait for PERIOD;
             test_error <= '0';
-            test_i <= STD_LOGIC_VECTOR(to_unsigned(I - 1, 5));
+            test_i <= STD_LOGIC_VECTOR(to_unsigned(I, 5));
             round_constant <= test_input(I);
             true_o <= test_output(I);
             wait for PERIOD;
