@@ -462,6 +462,41 @@ def CalcKeyInverse(key):
     print("The inverse of the key is as follows:\n0x{0:02x}\n".format(invKey))
 
 
+def generate_sbox_lookup_tables():
+    """
+    Generate the sbox values for SSbi with i = 0,1,2,3 and print them
+    :return:
+    """
+    # Change output length of numpy arrays, makes viewing these Sboxes more convenient
+    desired_width = 320
+    np.set_printoptions(linewidth=desired_width)
+    bit_length = 8
+    sbox_width = 2 ** (bit_length // 2)
+    sbox_lookup_tables = []
+    for i in range(4):
+        sbox_lookup_table = np.zeros((sbox_width, sbox_width), dtype=np.int32)
+        for val in range(np.iinfo(np.uint8).max + 1):
+            least_significant_nibble = val & 0xF
+            most_significant_nibble = (val >> 4) & 0xF
+            # The column is determined by the least significant nibble,
+            # The row is determined by the most significant nibble
+            s_box_val = SSbi(val, i)
+            sbox_lookup_table[most_significant_nibble, least_significant_nibble] = s_box_val
+        #
+        print("Sbox table values for SSb{}".format(i))
+        for row in range(sbox_lookup_table.shape[0]):
+            # Convert the values of this row to hex and print it.
+            row_values = sbox_lookup_table[row]
+            # Pad hex values with zeros such that the length is 4 (including 0x),
+            # see https://stackoverflow.com/a/12638477 for more information
+            row_values = ["{0:#0{1}x}".format(val, 4) for val in row_values]
+            print(row_values)
+        print("\n")
+
+        sbox_lookup_tables.append(sbox_lookup_table)
+    return sbox_lookup_tables
+
+
 def main():
     # Midori 128 implementation
     plaintext = "0x51084ce6e73a5ca2ec87d7babc297543"
